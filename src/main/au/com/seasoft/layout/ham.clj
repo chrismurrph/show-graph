@@ -1,8 +1,8 @@
-(ns layout.ham
+(ns au.com.seasoft.layout.ham
   (:require
-    [graph.example-data :as example]
-    [graph.graph :as gr]
-    [graph.util :as util]
+    [au.com.seasoft.graph.example-data :as example]
+    [au.com.seasoft.graph.graph :as gr]
+    [au.com.seasoft.graph.util :as util]
     [au.com.seasoft.general.dev :as dev]
     [com.fulcrologic.guardrails.core :refer [>defn => | ?]]
     [clojure.core.async :as async :refer [>! chan go go-loop alts!! timeout]]

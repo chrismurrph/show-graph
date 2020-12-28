@@ -6,6 +6,7 @@
            org.clojure/core.async     {:mvn/version "1.3.610"}
            com.rpl/specter            {:mvn/version "1.1.3"}
            cjmurphy/ham               {:mvn/version "0.9.1"}
+           cljfx/cljfx                {:mvn/version "1.7.11"}
            }
  :aliases {:tset      {:extra-paths ["src/test"]}
            :run-tests {:extra-deps {com.cognitect/test-runner {:git/url "https://github.com/cognitect-labs/test-runner.git"

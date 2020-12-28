@@ -1,7 +1,7 @@
-(ns graph.graph
+(ns au.com.seasoft.graph.graph
   "Clojure specs used by graph orientated functions, as well as graph orientated functions that are not metrics"
   (:require
-    [graph.example-data :as example]
+    [au.com.seasoft.graph.example-data :as example]
     [com.fulcrologic.guardrails.core :refer [>defn => | ?]]
     [clojure.spec.alpha :as s]
     ))

@@ -1,4 +1,4 @@
-(ns graph.util)
+(ns au.com.seasoft.graph.util)
 
 (defn changing-booleans
   "Outputs streams of either true or false"

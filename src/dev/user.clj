@@ -3,8 +3,7 @@
     [clojure.pprint :refer [pprint]]
     [clojure.stacktrace :as st]
     [clojure.tools.namespace.repl :as tools-ns :refer [set-refresh-dirs]]
-    [clojure.spec.alpha :as s]
-    [reveal.e03-chess-server-popups]))
+    [clojure.spec.alpha :as s]))
 
 (comment
   "reveal has some of this"

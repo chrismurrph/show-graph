@@ -1,4 +1,4 @@
-(ns graph.example-data
+(ns au.com.seasoft.graph.example-data
   "Example data used in tests")
 
 (def simple-graph
