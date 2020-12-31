@@ -54,16 +54,9 @@
   (set (mapcat (fn [m]
                  (keys m)) (vals g))))
 
-(defn x-1 []
-  (nodes-in-edges example/nodes-graph))
-
 (defn graph? [x]
   (let [nodes (-> x keys set)]
     (and (map? x)
          (-> x vals first map?)
          (every? kw->number nodes)
          (clojure.set/subset? (nodes-in-edges x) nodes))))
-
-(defn x-2 []
-  (every? graph? [example/simple-graph example/full-graph example/nodes-graph example/unreachable-nodes-graph]))
-

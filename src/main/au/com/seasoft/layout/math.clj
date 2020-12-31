@@ -10,7 +10,6 @@
   (Math/pow n m))
 
 (defn atanh [^double value]
-  ;Math.log(Math.abs((value + 1.0) / (1.0 - value))) / 2;
   (assert (not= 1.0 value) ["Will be a / by 0 in atanh" value])
   (/ (log
        (abs

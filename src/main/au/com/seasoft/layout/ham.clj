@@ -1,9 +1,7 @@
 (ns au.com.seasoft.layout.ham
   (:require
-    [au.com.seasoft.graph.example-data :as example]
     [au.com.seasoft.graph.graph :as gr]
     [au.com.seasoft.graph.util :as util]
-    [au.com.seasoft.general.dev :as dev]
     [com.fulcrologic.guardrails.core :refer [>defn => | ?]]
     [clojure.core.async :as async :refer [>! chan go go-loop alts!! timeout]]
     )
@@ -12,27 +10,24 @@
     [com.syncleus.dann.math Vector]
     (java.util Map)))
 
-(def options (tap> {::radius             10
-                    ::margin             10
-                    ::magnify            20
-                    ::alignment-attempts 150
-                    ::silent?            true
-                    ::number-of-tries    30
-                    ::max-user-wait-time 1000
-                    }))
+(defn debug [& s]
+  (apply println "view:graph -" s))
+
+(def options {::radius             10
+              ::margin             10
+              ::magnify            20
+              ::alignment-attempts 150
+              ::silent?            true
+              ::number-of-tries    30
+              ::max-user-wait-time 1000
+              })
 
 (defn node->interop-node [node]
   (InteropNode. (util/kw->number node)))
 
-(defn x-2 []
-  (node->interop-node :1))
-
 (defn edge->interop-edge [[source-node target-node]]
   (InteropEdge.
     (node->interop-node source-node) (node->interop-node target-node)))
-
-(defn x-3 []
-  (edge->interop-edge [:1 :3]))
 
 (defn graph->interop-graph [graph]
   (let [result (GenericGraph/create)
@@ -77,7 +72,7 @@
   To get it bang in the top left corner we will need to find the top-most and left-most nodes.
   Apply a margin after that."
   [coords]
-  (let [origin-shift (::radius options)
+  (let [origin-shift 10
         {:keys [::radius ::margin ::magnify]} options
         coords (->> coords
                     (map (fn [[k v]]
@@ -107,6 +102,8 @@
 (>defn graph->coords [g]
   [::gr/graph => any?]
   (let [{:keys [::number-of-tries ::max-user-wait-time]} options
+        _ (assert (int? number-of-tries) ["number-of-tries not int?" number-of-tries])
+        _ (assert (int? max-user-wait-time) ["max-user-wait-time not int?" max-user-wait-time])
         timeout-chan (timeout max-user-wait-time)
         cs (repeatedly number-of-tries chan)]
     (go-loop [cs cs
@@ -116,7 +113,7 @@
           (do
             ;; Does an extra unnecessary one before alts picks up the already decided winner. Not a problem that needs
             ;; to be solved
-            (dev/log-on "Aligned ordinal" ordinal "after" counted "advances")
+            (debug "Aligned ordinal" ordinal "after" counted "advances")
             (>! (first cs) (conj res ordinal))
             (recur (next cs) (inc ordinal)))
           (do
@@ -126,14 +123,8 @@
     (let [[[counted coords ordinal] c] (alts!! (conj cs timeout-chan))]
       (if (not= c timeout-chan)
         (do
-          (dev/log-on "Winner is ordinal" ordinal "aligned after" counted "advances")
+          (debug "Winner is ordinal" ordinal "aligned after" counted "advances")
           (-> coords
               interop-coords->coords
               scale-coords))
-        (dev/log-on "Timed out at" max-user-wait-time "before any of the" number-of-tries "channels could align")))))
-
-(defn x-1 []
-  (let [g example/unreachable-nodes-graph
-        coords (graph->coords g)]
-    (when coords
-      (dev/pp coords))))
+        (debug "Timed out at" max-user-wait-time "before any of the" number-of-tries "channels could align")))))
