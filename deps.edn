@@ -14,4 +14,10 @@
                        :main-opts  ["-m" "cognitect.test-runner"]}
            :dev       {:extra-paths ["src/dev" "src/test"]
                        :extra-deps  {org.clojure/tools.namespace {:mvn/version "0.3.1"}}}
+           :example   {:extra-paths ["src/example"]
+                       :extra-deps  {vlaaad/reveal    {:mvn/version "RELEASE"}
+                                     cjmurphy/dev-lib {:mvn/version "0.3.0"}
+                                     }
+                       }
+
            }}

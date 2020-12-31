@@ -1,5 +1,6 @@
 (ns user
   (:require
+    [au.com.seasoft.reveal.view]
     [clojure.pprint :refer [pprint]]
     [clojure.stacktrace :as st]
     [clojure.tools.namespace.repl :as tools-ns :refer [set-refresh-dirs]]
@@ -17,7 +18,7 @@
 (defn print-stack-trace [one two]
   (st/print-cause-trace one two))
 
-(set-refresh-dirs "src/dev" "src/main" "src/test")
+(set-refresh-dirs "src/dev" "src/main" "src/test" "src/example")
 
 (defn refresh [& args]
   (tools-ns/refresh))

@@ -1,5 +1,4 @@
-(ns au.com.seasoft.graph.util
-  (:require [clojure.pprint :as pprint]))
+(ns au.com.seasoft.graph.util)
 
 (defn kw->number [kw]
   (-> kw name Long/parseLong))
