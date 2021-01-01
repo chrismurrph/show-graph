@@ -99,6 +99,17 @@
     (when aligned?
       [(.getCounter interop-ham-2) (.getCoordinates interop-ham-2)])))
 
+(defn ordinal-text [n]
+  (case n
+    1 "first"
+    2 "second"
+    3 "third"
+    4 "forth"
+    5 "fifth"
+    6 "sixth"
+    7 "seventh"
+    (str "ordinal " n)))
+
 (>defn graph->coords [g]
   [::gr/graph => any?]
   (let [{:keys [::number-of-tries ::max-user-wait-time]} options
@@ -113,7 +124,7 @@
           (do
             ;; Does an extra unnecessary one before alts picks up the already decided winner. Not a problem that needs
             ;; to be solved
-            (debug "Aligned ordinal" ordinal "after" counted "advances")
+            (debug "Aligned" (ordinal-text ordinal) "after" counted "advances")
             (>! (first cs) (conj res ordinal))
             (recur (next cs) (inc ordinal)))
           (do
@@ -123,7 +134,7 @@
     (let [[[counted coords ordinal] c] (alts!! (conj cs timeout-chan))]
       (if (not= c timeout-chan)
         (do
-          (debug "Winner is ordinal" ordinal "aligned after" counted "advances")
+          (debug "Winner is" (ordinal-text ordinal) "aligned after" counted "advances")
           (-> coords
               interop-coords->coords
               scale-coords))

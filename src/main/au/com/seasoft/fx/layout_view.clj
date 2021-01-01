@@ -3,17 +3,18 @@
     [au.com.seasoft.layout.ham :as ham]
     [au.com.seasoft.graph.graph :as gr]
     [au.com.seasoft.graph.util :as util]
-    [au.com.seasoft.graph.example-data :as example-data]
     [au.com.seasoft.layout.math :as math]
-    [cljfx.api :as fx]
-    [com.rpl.specter :as sp])
+    [cljfx.ext.node :as fx.ext.node])
   (:import [javafx.scene.paint Color]))
 
 (def options {::vertex-fill-colour  Color/BROWN
               ::vertex-rim-colour   Color/BLACK
               ::vertex-label-colour Color/WHITE
               ::edge-colour         Color/DARKCYAN
-              ::background-colour   Color/LIGHTGRAY
+              ;; Sometimes get:
+              ;; WARNING: CSS Error parsing '*{-fx-background-color: 0xd3d3d3ff}: Unexpected token '0xd' at [1,24]
+              ;; In which case the bg will be white
+              ;::background-colour   Color/LIGHTGRAY
               })
 
 (defn vertex-view->index-number
@@ -22,7 +23,7 @@
   (let [{:keys [text] :as label-child} (first (filter (comp #{:label} :fx/type) children))]
     (Long/parseLong text)))
 
-(defn vertex-view
+(defn vertex-view-1
   [index [x y :as point]]
   (let [radius (::ham/radius ham/options)
         {:keys [::vertex-fill-colour ::vertex-label-colour ::vertex-rim-colour]} options]
@@ -37,12 +38,33 @@
                  :text-fill vertex-label-colour
                  :text      (str index)}]}))
 
+(defn vertex-view-2
+  [index [x y :as point]]
+  (let [radius (::ham/radius ham/options)
+        {:keys [::vertex-fill-colour ::vertex-label-colour ::vertex-rim-colour]} options]
+    (println "In vertex-view-2")
+    {:fx/type  :stack-pane
+     :layout-x x
+     :layout-y y
+     :children [{:fx/type fx.ext.node/with-tooltip-props
+                 :props   {:tooltip {:fx/type :tooltip
+                                     ;; jdk 11 only
+                                     ;:show-duration [1 :h]
+                                     :text    "See me?"}}
+                 :desc    {:fx/type :circle
+                           :fill    vertex-fill-colour
+                           :stroke  vertex-rim-colour
+                           :radius  radius}}
+                {:fx/type   :label
+                 :text-fill vertex-label-colour
+                 :text      (str index)}]}))
+
 (defn ->vertex-views
   [coords]
   (->> coords
        (map (fn [[k v]]
               (let [[x y] v
-                    view (vertex-view (util/kw->number k) [x y])]
+                    view (vertex-view-2 (util/kw->number k) [x y])]
                 view)))))
 
 (defn edge-view-arrow [[x y :as central-point] rotate-by-degrees]
@@ -127,14 +149,12 @@
 (defn pane-of-vertices-and-edges
   "Makes sure the edges come before the vertices"
   [children]
-  (let [{:keys [::background-colour]} options]
-    {:fx/type  :pane
-     :style    {:-fx-background-color background-colour}
-     :children (sort-by (fn [view]
-                          (cond
-                            (edge-view? view) -1
-                            (vertex-view? view) 1))
-                        children)}))
+  {:fx/type  :pane
+   :children (sort-by (fn [view]
+                        (cond
+                          (edge-view? view) -1
+                          (vertex-view? view) 1))
+                      children)})
 
 (def error-message
   {:fx/type  :stack-pane
