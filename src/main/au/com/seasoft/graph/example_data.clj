@@ -47,6 +47,22 @@
    :3  {:4 7 :5 6 :8 2}
    :6  {}})
 
+(def not-connected-graph
+  ":8 does not go to :9, hence there are 2 islands. Can't be drawn by the algorithm we use so the error message
+  is elicited."
+  {:12 {}
+   :11 {:12 10}
+   :10 {:12 3}
+   :4  {:2 4 :7 5}
+   :7  {:6 1 :8 11}
+   :1  {:3 5}
+   :8  {}
+   :9  {:10 17 :11 5}
+   :2  {:1 10}
+   :5  {:6 9 :7 3}
+   :3  {:4 7 :5 6 :8 2}
+   :6  {}})
+
 (def grouped-by-graph-map-entry
   [:4 [[:4 {:2 4}]
        [:4 {:3 2}]]])

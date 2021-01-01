@@ -9,11 +9,11 @@
     [com.rpl.specter :as sp])
   (:import [javafx.scene.paint Color]))
 
-(def options {::vertex-fill-colour  Color/ORCHID
-              ::vertex-rim-colour   :black
-              ::vertex-label-colour :white
-              ::edge-colour         :green
-              ::background-colour   :yellow
+(def options {::vertex-fill-colour  Color/BROWN
+              ::vertex-rim-colour   Color/BLACK
+              ::vertex-label-colour Color/WHITE
+              ::edge-colour         Color/DARKCYAN
+              ::background-colour   Color/LIGHTGRAY
               })
 
 (defn vertex-view->index-number
@@ -139,7 +139,7 @@
 (def error-message
   {:fx/type  :stack-pane
    :children [{:fx/type :label
-               :text    "Was not able to quickly create a nicely aligned graph"
+               :text    "Was not able to quickly create a nicely aligned graph. Is the graph connected?"
                :style   {:-fx-font-weight :bold}}]})
 
 (defn graph->component [g]
