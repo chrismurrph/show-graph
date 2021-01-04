@@ -6,4 +6,4 @@
 
 (defn x-3 []
   (let [g example-data/nodes-graph]
-    (view-util/see-something-2 (layout/graph->component g))))
+    (view-util/see-something-1 (layout/graph->component g))))

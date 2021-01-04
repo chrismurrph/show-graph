@@ -4,7 +4,8 @@
     [au.com.seasoft.graph.graph :as gr]
     [au.com.seasoft.graph.util :as util]
     [au.com.seasoft.layout.math :as math]
-    [cljfx.ext.node :as fx.ext.node])
+    [cljfx.ext.node :as fx.ext.node]
+    [vlaaad.reveal.ext :as rx])
   (:import [javafx.scene.paint Color]))
 
 (def options {::vertex-fill-colour  Color/BROWN
@@ -23,6 +24,7 @@
   (let [{:keys [text] :as label-child} (first (filter (comp #{:label} :fx/type) children))]
     (Long/parseLong text)))
 
+;; Works fine but we are not even trying to give it a tool tip
 (defn vertex-view-1
   [index [x y :as point]]
   (let [radius (::ham/radius ham/options)
@@ -38,11 +40,12 @@
                  :text-fill vertex-label-colour
                  :text      (str index)}]}))
 
+;; Can never see the tooltip
 (defn vertex-view-2
   [index [x y :as point]]
   (let [radius (::ham/radius ham/options)
         {:keys [::vertex-fill-colour ::vertex-label-colour ::vertex-rim-colour]} options]
-    (println "In vertex-view-2")
+    (println (str "In vertex-view-2 for point" point))
     {:fx/type  :stack-pane
      :layout-x x
      :layout-y y
@@ -50,7 +53,7 @@
                  :props   {:tooltip {:fx/type :tooltip
                                      ;; jdk 11 only
                                      ;:show-duration [1 :h]
-                                     :text    "See me?"}}
+                                     :text    (str "See me at " x ", " y)}}
                  :desc    {:fx/type :circle
                            :fill    vertex-fill-colour
                            :stroke  vertex-rim-colour
@@ -59,12 +62,36 @@
                  :text-fill vertex-label-colour
                  :text      (str index)}]}))
 
+;; This is what we want for Reveal. But can't seem to tab to a vertex.
+(defn vertex-view-3
+  [index [x y :as point]]
+  (let [radius (::ham/radius ham/options)
+        {:keys [::vertex-fill-colour ::vertex-label-colour ::vertex-rim-colour]} options]
+    (println (str "In vertex-view-3 for point" point))
+    {:fx/type  :stack-pane
+     :layout-x x
+     :layout-y y
+     :children [{:fx/type :circle
+                 :fill    vertex-fill-colour
+                 :stroke  vertex-rim-colour
+                 :radius  radius}
+                {:fx/type rx/popup-view
+                 :value   point
+                 ;; Did not work
+                 ;:props   {:tooltip {:fx/type :tooltip
+                 ;                    ;; jdk 11 only
+                 ;                    ;:show-duration [1 :h]
+                 ;                    :text    (str "See me at " x ", " y)}}
+                 :desc    {:fx/type   :label
+                           :text-fill vertex-label-colour
+                           :text      (str index)}}]}))
+
 (defn ->vertex-views
   [coords]
   (->> coords
        (map (fn [[k v]]
               (let [[x y] v
-                    view (vertex-view-2 (util/kw->number k) [x y])]
+                    view (vertex-view-3 (util/kw->number k) [x y])]
                 view)))))
 
 (defn edge-view-arrow [[x y :as central-point] rotate-by-degrees]
@@ -150,11 +177,11 @@
   "Makes sure the edges come before the vertices"
   [children]
   {:fx/type  :pane
-   :children (sort-by (fn [view]
-                        (cond
-                          (edge-view? view) -1
-                          (vertex-view? view) 1))
-                      children)})
+   :children (vec (sort-by (fn [view]
+                             (cond
+                               (edge-view? view) -1
+                               (vertex-view? view) 1))
+                           children))})
 
 (def error-message
   {:fx/type  :stack-pane
@@ -162,12 +189,15 @@
                :text    "Was not able to quickly create a nicely aligned graph. Is the graph connected?"
                :style   {:-fx-font-weight :bold}}]})
 
+(defn coords->component [g coords]
+  (let [view-vertices (->vertex-views coords)
+        view-edges (->edge-views g coords)
+        view-arrows (->arrow-views g coords)
+        widgets (concat view-vertices view-edges view-arrows)]
+    (pane-of-vertices-and-edges widgets)))
+
 (defn graph->component [g]
   (let [coords (ham/graph->coords g)]
     (if coords
-      (let [view-vertices (->vertex-views coords)
-            view-edges (->edge-views g coords)
-            view-arrows (->arrow-views g coords)
-            widgets (concat view-vertices view-edges view-arrows)]
-        (pane-of-vertices-and-edges widgets))
+      (coords->component g coords)
       error-message)))
