@@ -4,7 +4,7 @@
     [au.com.seasoft.graph.example-data :as example]
     [com.fulcrologic.guardrails.core :refer [>defn => | ?]]
     [clojure.spec.alpha :as s]
-    ))
+    [au.com.seasoft.general.dev :as dev]))
 
 ;;
 ;; A node on a graph
@@ -52,11 +52,14 @@
 
 (defn nodes-in-edges [g]
   (set (mapcat (fn [m]
-                 (keys m)) (vals g))))
+                 (keys m))
+               (vals g))))
 
 (defn graph? [x]
-  (let [nodes (-> x keys set)]
-    (and (map? x)
-         (-> x vals first map?)
-         (every? kw->number nodes)
-         (clojure.set/subset? (nodes-in-edges x) nodes))))
+  (let [nodes (-> x keys set)
+        res (and (map? x)
+                 (-> x vals first map?)
+                 (every? kw->number nodes)
+                 (clojure.set/subset? (nodes-in-edges x) nodes))]
+    (dev/log-on "graph?" res nodes (nodes-in-edges x))
+    res))

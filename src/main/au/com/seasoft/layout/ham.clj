@@ -43,25 +43,27 @@
       (.addEdge result edge))
     result))
 
-(defn interop-coords->coords [^Map interop-coords]
-  (reduce
-    (fn [m map-entry]
-      (let [^InteropNode interop-node (.getKey map-entry)
-            node-id (-> (.getId interop-node) str keyword)
-            ^Vector v (.getValue map-entry)
-            _ (assert (= 2 (.getDimensions v)))
-            x (.getCoordinate v 1)
-            y (.getCoordinate v 2)]
-        (assoc m node-id [x y])))
-    {}
-    (.entrySet interop-coords)))
+(defn interop-coords->coords-hof [g]
+  (fn [^Map interop-coords]
+    (reduce
+      (fn [m map-entry]
+        (let [^InteropNode interop-node (.getKey map-entry)
+              node-id (-> (.getId interop-node) str keyword)
+              targets-map (get g node-id)
+              ^Vector v (.getValue map-entry)
+              _ (assert (= 2 (.getDimensions v)))
+              x (.getCoordinate v 1)
+              y (.getCoordinate v 2)]
+          (assoc m node-id (merge targets-map {:id node-id :x x :y y}))))
+      {}
+      (.entrySet interop-coords))))
 
 (defn coords->smallest-x-and-y
   "Finds the distance of the nodes closest to the top and closest to the left edge. Not returning a coordinate here!
   Useful for putting the graph view into the top left corner"
   [coords]
   (reduce
-    (fn [[min-x min-y] [k [x y]]]
+    (fn [[min-x min-y] [k {:keys [x y]}]]
       [(min min-x x) (min min-y y)])
     [Double/MAX_VALUE Double/MAX_VALUE]
     coords))
@@ -76,28 +78,27 @@
         {:keys [::radius ::margin ::magnify]} options
         coords (->> coords
                     (map (fn [[k v]]
-                           (let [[x y] v
+                           (let [{:keys [x y]} v
                                  new-x (+ radius (* (+ x origin-shift) magnify))
                                  new-y (+ radius (* (+ y origin-shift) magnify))]
-                             [k [new-x new-y]]))))
+                             [k (assoc v :x new-x :y new-y)]))))
         [left-shift raise-shift] (coords->smallest-x-and-y coords)]
     (->> coords
          (map (fn [[k v]]
-                (let [[x y] v
+                (let [{:keys [x y]} v
                       new-x (- x left-shift (- margin))
                       new-y (- y raise-shift (- margin))]
-                  [k [new-x new-y]])))
+                  [k (assoc v :x new-x :y new-y)])))
          (into {}))))
 
 (defn- -graph->coords
   [g]
   (let [{:keys [::alignment-attempts ::silent?]} options
         interop-graph (graph->interop-graph g)
-        interop-ham-1 (InteropHAM/create interop-graph 2)
-        interop-ham-2 (InteropHAM/attemptToAlign interop-ham-1 alignment-attempts silent?)
-        aligned? (.isAligned interop-ham-2)]
-    (when aligned?
-      [(.getCounter interop-ham-2) (.getCoordinates interop-ham-2)])))
+        interop-ham (InteropHAM/create interop-graph 2)
+        perhaps-aligned-ham (InteropHAM/attemptToAlign interop-ham alignment-attempts silent?)]
+    (when (.isAligned perhaps-aligned-ham)
+      [(.getCounter perhaps-aligned-ham) (.getCoordinates perhaps-aligned-ham)])))
 
 (defn ordinal-text [n]
   (case n
@@ -131,7 +132,8 @@
             ;; Here we couldn't reach alignment after exhausting all the attempts/advances allowed,
             ;; so we start afresh on the next ordinal
             (recur (next cs) (inc ordinal))))))
-    (let [[[counted coords ordinal] c] (alts!! (conj cs timeout-chan))]
+    (let [interop-coords->coords (interop-coords->coords-hof g)
+          [[counted coords ordinal] c] (alts!! (conj cs timeout-chan))]
       (if (not= c timeout-chan)
         (do
           (debug "Winner is" (ordinal-text ordinal) "aligned after" counted "advances")

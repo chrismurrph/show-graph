@@ -6,7 +6,7 @@
     [au.com.seasoft.graph.example-data :as example-data]))
 
 (deftest vertex-view-index
-  (is (= (-> (layout-view/vertex-view-1 3 [10 10])
+  (is (= (-> (layout-view/vertex-view 3 {:x 10 :y 10})
              layout-view/vertex-view->index-number)
          3)))
 

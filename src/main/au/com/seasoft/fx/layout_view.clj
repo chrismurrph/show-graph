@@ -24,64 +24,21 @@
   (let [{:keys [text] :as label-child} (first (filter (comp #{:label} :fx/type) children))]
     (Long/parseLong text)))
 
-;; Works fine but we are not even trying to give it a tool tip
-(defn vertex-view-1
-  [index [x y :as point]]
+(defn vertex-view
+  [index {:keys [x y] :as props}]
   (let [radius (::ham/radius ham/options)
         {:keys [::vertex-fill-colour ::vertex-label-colour ::vertex-rim-colour]} options]
+    ;(println (str "In vertex-view for props" props))
     {:fx/type  :stack-pane
      :layout-x x
      :layout-y y
-     :children [{:fx/type :circle
-                 :fill    vertex-fill-colour
-                 :stroke  vertex-rim-colour
-                 :radius  radius}
-                {:fx/type   :label
-                 :text-fill vertex-label-colour
-                 :text      (str index)}]}))
-
-;; Can never see the tooltip
-(defn vertex-view-2
-  [index [x y :as point]]
-  (let [radius (::ham/radius ham/options)
-        {:keys [::vertex-fill-colour ::vertex-label-colour ::vertex-rim-colour]} options]
-    (println (str "In vertex-view-2 for point" point))
-    {:fx/type  :stack-pane
-     :layout-x x
-     :layout-y y
-     :children [{:fx/type fx.ext.node/with-tooltip-props
-                 :props   {:tooltip {:fx/type :tooltip
-                                     ;; jdk 11 only
-                                     ;:show-duration [1 :h]
-                                     :text    (str "See me at " x ", " y)}}
-                 :desc    {:fx/type :circle
-                           :fill    vertex-fill-colour
-                           :stroke  vertex-rim-colour
-                           :radius  radius}}
-                {:fx/type   :label
-                 :text-fill vertex-label-colour
-                 :text      (str index)}]}))
-
-;; This is what we want for Reveal. But can't seem to tab to a vertex.
-(defn vertex-view-3
-  [index [x y :as point]]
-  (let [radius (::ham/radius ham/options)
-        {:keys [::vertex-fill-colour ::vertex-label-colour ::vertex-rim-colour]} options]
-    (println (str "In vertex-view-3 for point" point))
-    {:fx/type  :stack-pane
-     :layout-x x
-     :layout-y y
+     ;; Important that the label comes last so the user can visually tab to it
      :children [{:fx/type :circle
                  :fill    vertex-fill-colour
                  :stroke  vertex-rim-colour
                  :radius  radius}
                 {:fx/type rx/popup-view
-                 :value   point
-                 ;; Did not work
-                 ;:props   {:tooltip {:fx/type :tooltip
-                 ;                    ;; jdk 11 only
-                 ;                    ;:show-duration [1 :h]
-                 ;                    :text    (str "See me at " x ", " y)}}
+                 :value   props
                  :desc    {:fx/type   :label
                            :text-fill vertex-label-colour
                            :text      (str index)}}]}))
@@ -90,8 +47,7 @@
   [coords]
   (->> coords
        (map (fn [[k v]]
-              (let [[x y] v
-                    view (vertex-view-3 (util/kw->number k) [x y])]
+              (let [view (vertex-view (util/kw->number k) v)]
                 view)))))
 
 (defn edge-view-arrow [[x y :as central-point] rotate-by-degrees]
@@ -142,7 +98,9 @@
                 {:fx/type :line-to
                  :x       to-x :y to-y}]}))
 
-(defn shift-point [amount [x y]]
+(defn shift-point [amount {:keys [x y] :as props}]
+  (assert (number? x) ["Expected a map with :x in it" props])
+  (assert (number? y) ["Expected a map with :y in it" props])
   [(+ amount x) (+ amount y)])
 
 (defn ->edge-views
