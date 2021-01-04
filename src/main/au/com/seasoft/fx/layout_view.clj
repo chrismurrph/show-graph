@@ -4,30 +4,39 @@
     [au.com.seasoft.graph.graph :as gr]
     [au.com.seasoft.graph.util :as util]
     [au.com.seasoft.layout.math :as math]
-    [cljfx.ext.node :as fx.ext.node]
     [vlaaad.reveal.ext :as rx])
   (:import [javafx.scene.paint Color]))
 
-(def options {::vertex-fill-colour  Color/BROWN
-              ::vertex-rim-colour   Color/BLACK
-              ::vertex-label-colour Color/WHITE
-              ::edge-colour         Color/DARKCYAN
-              ;; Sometimes get:
-              ;; WARNING: CSS Error parsing '*{-fx-background-color: 0xd3d3d3ff}: Unexpected token '0xd' at [1,24]
-              ;; In which case the bg will be white
-              ;::background-colour   Color/LIGHTGRAY
-              })
+(def colour-options
+  {::vertex-fill-colour  Color/BROWN
+   ::vertex-rim-colour   Color/BLACK
+   ::vertex-label-colour Color/WHITE
+   ::edge-colour         Color/DARKCYAN})
 
-(defn vertex-view->index-number
+#_(defn vertex-view->index-number
   "The thing on the screen can be identified by a number"
   [{:keys [children] :as vertex-view}]
   (let [{:keys [text] :as label-child} (first (filter (comp #{:label} :fx/type) children))]
     (Long/parseLong text)))
 
+(defn vertex-view->props [view]
+  (->> view
+       :children
+       (some :value)))
+
+(defn vertex-view->id [view]
+  (let [res (-> view
+                vertex-view->props
+                :id
+                util/kw->number)]
+    (assert (int? res) ["Not found id from props" (vertex-view->props view)])
+    res))
+
 (defn vertex-view
-  [index {:keys [x y] :as props}]
+  [{:keys [x y id] :as props}]
+  (assert (keyword? id) ["Props must have an :id that's a keyword" props])
   (let [radius (::ham/radius ham/options)
-        {:keys [::vertex-fill-colour ::vertex-label-colour ::vertex-rim-colour]} options]
+        {:keys [::vertex-fill-colour ::vertex-label-colour ::vertex-rim-colour]} colour-options]
     ;(println (str "In vertex-view for props" props))
     {:fx/type  :stack-pane
      :layout-x x
@@ -41,13 +50,13 @@
                  :value   props
                  :desc    {:fx/type   :label
                            :text-fill vertex-label-colour
-                           :text      (str index)}}]}))
+                           :text      (util/kw->string id)}}]}))
 
 (defn ->vertex-views
   [coords]
   (->> coords
        (map (fn [[k v]]
-              (let [view (vertex-view (util/kw->number k) v)]
+              (let [view (vertex-view v)]
                 view)))))
 
 (defn edge-view-arrow [[x y :as central-point] rotate-by-degrees]
@@ -57,7 +66,7 @@
         ;; top left corner to the central point.
         transform-x (- x triangle-x-radius)
         transform-y (- y triangle-y-radius)
-        {:keys [::edge-colour]} options]
+        {:keys [::edge-colour]} colour-options]
     {:fx/type  :group
      :rotate   rotate-by-degrees
      :children [{:fx/type :polygon
@@ -81,8 +90,7 @@
         up-to-arrow-point (- length (+ arrowhead-base radius))
         proportion (/ up-to-arrow-point length)
         up-to-x-delta (* proportion x-delta)
-        up-to-y-delta (* proportion y-delta)
-        ]
+        up-to-y-delta (* proportion y-delta)]
     [(+ from-x up-to-x-delta) (+ from-y up-to-y-delta)]))
 
 (defn triangle-view [[from-x from-y :as from] [to-x to-y :as to]]
@@ -90,13 +98,11 @@
       (edge-view-arrow (+ 90 (math/line-slope from to)))))
 
 (defn edge-view [[from-x from-y :as from] [to-x to-y :as to]]
-  (let [{:keys [::edge-colour]} options]
+  (let [{:keys [::edge-colour]} colour-options]
     {:fx/type  :path
      :stroke   edge-colour
-     :elements [{:fx/type :move-to
-                 :x       from-x :y from-y}
-                {:fx/type :line-to
-                 :x       to-x :y to-y}]}))
+     :elements [{:fx/type :move-to :x from-x :y from-y}
+                {:fx/type :line-to :x to-x :y to-y}]}))
 
 (defn shift-point [amount {:keys [x y] :as props}]
   (assert (number? x) ["Expected a map with :x in it" props])
@@ -137,8 +143,11 @@
   {:fx/type  :pane
    :children (vec (sort-by (fn [view]
                              (cond
-                               (edge-view? view) -1
-                               (vertex-view? view) 1))
+                               (edge-view? view)
+                               -1
+
+                               (vertex-view? view)
+                               (vertex-view->id view)))
                            children))})
 
 (def error-message

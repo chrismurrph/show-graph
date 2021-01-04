@@ -15,7 +15,7 @@
                     (fn []
                       (let [g x
                             state (atom (ham/graph->coords g))]
-                        (dev/log-on "Its a graph so s/be able to see :view/graph")
+                        (dev/log-off "Its a graph so s/be able to see :view/graph")
                         {:fx/type rx/observable-view
                          :ref     state
                          :fn      (fn [coords]

@@ -6,8 +6,8 @@
     [au.com.seasoft.graph.example-data :as example-data]))
 
 (deftest vertex-view-index
-  (is (= (-> (layout-view/vertex-view 3 {:x 10 :y 10})
-             layout-view/vertex-view->index-number)
+  (is (= (-> (layout-view/vertex-view {:x 10 :y 10 :id :3})
+             layout-view/vertex-view->id)
          3)))
 
 (deftest coords->edge-position

@@ -12,11 +12,6 @@
 (s/def ::vertex keyword?)
 
 ;;
-;; The cost/penalty/distance for going from one vertex to another
-;;
-(s/def ::weight int?)
-
-;;
 ;; An edge is on a graph, whereas a pair is just [::vertex ::vertex]. The first a source and the second
 ;; a target, even if just potentially
 ;;
@@ -26,7 +21,7 @@
 ;; We say that each vertex of a graph has many targets even thou we don't directly use the target spec here
 ;; (i.e. a tuple (::target) is equivalent to a map-entry (what have here under s/map-of))
 ;;
-(s/def ::graph (s/map-of ::vertex (s/map-of ::vertex ::weight)))
+(s/def ::graph (s/map-of ::vertex (s/map-of ::vertex map?)))
 
 (>defn nodes
   [g]
@@ -60,6 +55,7 @@
         res (and (map? x)
                  (-> x vals first map?)
                  (every? kw->number nodes)
+                 (s/valid? ::graph x)
                  (clojure.set/subset? (nodes-in-edges x) nodes))]
-    (dev/log-on "graph?" res nodes (nodes-in-edges x))
+    (dev/log-off "graph?" res nodes (nodes-in-edges x))
     res))
