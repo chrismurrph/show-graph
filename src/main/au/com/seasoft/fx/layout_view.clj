@@ -28,8 +28,8 @@
   (let [res (-> view
                 vertex-view->props
                 :id
-                util/kw->number)]
-    (assert (int? res) ["Not found id from props" (vertex-view->props view)])
+                util/kw->string)]
+    (assert (string? res) ["Not found id from props" (vertex-view->props view)])
     res))
 
 (defn vertex-view
@@ -137,11 +137,24 @@
 (defn vertex-view? [{:fx/keys [type]}]
   (= :stack-pane type))
 
-(defn pane-of-vertices-and-edges
+(defn pane-of-vertices-and-edges-1
   "Makes sure the edges come before the vertices"
   [children]
   {:fx/type  :pane
    :children (vec (sort-by (fn [view]
+                             (cond
+                               (edge-view? view)
+                               -1
+
+                               (vertex-view? view)
+                               (vertex-view->id view)))
+                           children))})
+
+#_(defn pane-of-vertices-and-edges-2
+  "Makes sure the edges come before the vertices"
+  [children]
+  {:fx/type  :pane
+   :children (vec (sort (fn [view-a view-b]
                              (cond
                                (edge-view? view)
                                -1
@@ -161,7 +174,7 @@
         view-edges (->edge-views g coords)
         view-arrows (->arrow-views g coords)
         widgets (concat view-vertices view-edges view-arrows)]
-    (pane-of-vertices-and-edges widgets)))
+    (pane-of-vertices-and-edges-1 widgets)))
 
 (defn graph->component [g]
   (let [coords (ham/graph->coords g)]

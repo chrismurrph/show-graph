@@ -23,7 +23,7 @@
               })
 
 (defn node->interop-node [node]
-  (InteropNode. (util/kw->number node)))
+  (InteropNode. (util/kw->interop-id node)))
 
 (defn edge->interop-edge [[source-node target-node]]
   (InteropEdge.

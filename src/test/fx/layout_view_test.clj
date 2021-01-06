@@ -14,10 +14,10 @@
   (is (= [39.39339828220179 39.39339828220179] (layout-view/arrow-position [0 0] [50 50]))))
 
 (defn see-arrow []
-  (view-util/see-something-1 (layout-view/edge-view-arrow [20 50] 90)))
+  (view-util/see-something-simply (layout-view/edge-view-arrow [20 50] 90)))
 
 (defn see-graph []
-  (view-util/see-something-1 (layout-view/graph->component example-data/simple-graph)))
+  (view-util/see-something-simply (layout-view/graph->component example-data/simple-graph)))
 
 (comment
   (see-graph)

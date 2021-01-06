@@ -5,5 +5,5 @@
     [au.com.seasoft.fx.layout-view :as layout]))
 
 (defn x-3 []
-  (let [g example-data/nodes-graph]
-    (view-util/see-something-1 (layout/graph->component g))))
+  (let [g example-data/ints-nodes-graph]
+    (view-util/see-something-simply (layout/graph->component g))))

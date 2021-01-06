@@ -11,9 +11,9 @@ To see it working in Reveal follow these instructions:
 
 To give this `:view/graph` capability to your own application depend on this library in a development only
 deps.edn alias and make sure that `au.com.seasoft.reveal.view` is required. Then use Reveal as per usual 
-and any data structures that conform to `au.com.seasoft.graph.graph/graph?` (also more loosely the spec 
-`au.com.seasoft.graph.graph/graph`) will show the action `:view/graph` on the context menu. Make sure you
-bring up the context menu when you are on the opening `{` of the graph data structure.  
+and any data structures that conforms to `au.com.seasoft.graph.graph/graph?` will show the action `:view/graph` 
+on the context menu. However make sure you bring up the context menu when you are on the opening `{` of the 
+graph data structure.  
 
 # My notes
 

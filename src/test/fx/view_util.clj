@@ -18,7 +18,7 @@
   (pp something)
   (throw (Error. msg)))
 
-(defn see-something-1 [something]
+(defn see-something-simply [something]
   (assert something "Nothing to see")
   (if (has-nils? something)
     (show-and-throw something "nil values not allowed")
@@ -31,7 +31,7 @@
          :scene      {:fx/type :scene
                       :root    something}}))))
 
-(defn see-something-2 [something]
+(defn see-something-map-desc [something]
   (assert something "Nothing to see")
   (if (has-nils? something)
     (show-and-throw something "nil values not allowed")
