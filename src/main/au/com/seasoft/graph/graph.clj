@@ -1,7 +1,6 @@
 (ns au.com.seasoft.graph.graph
   "Clojure specs used by graph orientated functions, as well as graph orientated functions that are not metrics"
   (:require
-    [au.com.seasoft.graph.example-data :as example]
     [com.fulcrologic.guardrails.core :refer [>defn => | ?]]
     [clojure.spec.alpha :as s]
     [au.com.seasoft.general.dev :as dev]))
@@ -9,13 +8,13 @@
 ;;
 ;; A node on a graph
 ;;
-(s/def ::vertex keyword?)
+(s/def ::vertex any?)
 
 ;;
 ;; An edge is on a graph, whereas a pair is just [::vertex ::vertex]. The first a source and the second
 ;; a target, even if just potentially
 ;;
-(s/def ::pair (s/tuple (s/nilable ::vertex) (s/nilable ::vertex)))
+(s/def ::pair (s/tuple any? any?))
 
 ;;
 ;; We say that each vertex of a graph has many targets even thou we don't directly use the target spec here
@@ -40,11 +39,6 @@
     #{}
     g))
 
-(defn kw->number [kw]
-  (try
-    (some-> kw name Long/parseLong)
-    (catch Throwable th nil)))
-
 (defn nodes-in-edges [g]
   (set (mapcat (fn [m]
                  (keys m))
@@ -54,7 +48,6 @@
   (let [nodes (-> x keys set)
         res (and (map? x)
                  (-> x vals first map?)
-                 (every? kw->number nodes)
                  (s/valid? ::graph x)
                  (clojure.set/subset? (nodes-in-edges x) nodes))]
     (dev/log-off "graph?" res nodes (nodes-in-edges x))

@@ -7,7 +7,7 @@
 
 (deftest vertex-view-index
   (is (= (-> (layout-view/vertex-view {:x 10 :y 10 :id :3})
-             layout-view/vertex-view->id)
+             layout-view/vertex-view->ordered-int)
          3)))
 
 (deftest coords->edge-position

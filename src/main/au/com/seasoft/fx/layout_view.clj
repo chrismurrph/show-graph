@@ -13,28 +13,39 @@
    ::vertex-label-colour Color/WHITE
    ::edge-colour         Color/DARKCYAN})
 
-#_(defn vertex-view->index-number
-  "The thing on the screen can be identified by a number"
-  [{:keys [children] :as vertex-view}]
-  (let [{:keys [text] :as label-child} (first (filter (comp #{:label} :fx/type) children))]
-    (Long/parseLong text)))
-
 (defn vertex-view->props [view]
   (->> view
        :children
        (some :value)))
 
-(defn vertex-view->id [view]
-  (let [res (-> view
-                vertex-view->props
-                :id
-                util/kw->string)]
-    (assert (string? res) ["Not found id from props" (vertex-view->props view)])
-    res))
+(defn vertex-view->ordered-int
+  "When displayed it is what the user gave as the id, as a string, with the kw not showing the colon.
+  See util/->string
+  So if the keywords were actually numbers then tabbing will go 1 10 11 12 2..., which is wrong.
+  So here, just for the purposes of ordering, we return the underlying int? if that's what it is"
+  [view]
+  (let [id (-> view
+               vertex-view->props
+               :id)
+        id-as-int (cond
+                    (keyword? id)
+                    (let [s (util/kw->string id)]
+                      (try (Long/parseLong s)
+                           (catch Exception ex
+                             nil)))
+                    ;; Just in case the user provides string keys when underlying they are all numbers. Perhaps going
+                    ;; too far here...
+                    (string? id)
+                    (try (Long/parseLong id)
+                         (catch Exception ex
+                           nil)))]
+    (assert id ["Not found id from props" (vertex-view->props view)])
+    (if id-as-int
+      id-as-int
+      id)))
 
 (defn vertex-view
   [{:keys [x y id] :as props}]
-  (assert (keyword? id) ["Props must have an :id that's a keyword" props])
   (let [radius (::ham/radius ham/options)
         {:keys [::vertex-fill-colour ::vertex-label-colour ::vertex-rim-colour]} colour-options]
     ;(println (str "In vertex-view for props" props))
@@ -50,7 +61,7 @@
                  :value   props
                  :desc    {:fx/type   :label
                            :text-fill vertex-label-colour
-                           :text      (util/kw->string id)}}]}))
+                           :text      (util/->string id)}}]}))
 
 (defn ->vertex-views
   [coords]
@@ -109,6 +120,16 @@
   (assert (number? y) ["Expected a map with :y in it" props])
   [(+ amount x) (+ amount y)])
 
+;; Also dev-lib so use that when after deploy 0.5.0 of dev-lib
+(defn safe-get [m k]
+  (assert (map? m) ["safe-get expected to be used on a map" m])
+  (assert (seq m) ["nothing in the map so what's the point?" m])
+  (assert k ["key is nil" k m])
+  (let [res (get m k)]
+    (if (some? res)
+      res
+      (throw (ex-info "Could not find key in map" {:key k :map-keys (keys m)})))))
+
 (defn ->edge-views
   "Get all the edges from the graph. Then replace the 2 nodes of each with [x y]. Then have enough for an edge-view if
   alter for the radius"
@@ -116,7 +137,7 @@
   (let [radius (::ham/radius ham/options)]
     (->> (gr/pair-edges graph)
          (map (fn [[source target]]
-                [(get coords source) (get coords target)]))
+                [(safe-get coords source) (safe-get coords target)]))
          (map (fn [[from to]]
                 (edge-view (shift-point radius from) (shift-point radius to)))))))
 
@@ -137,31 +158,30 @@
 (defn vertex-view? [{:fx/keys [type]}]
   (= :stack-pane type))
 
-(defn pane-of-vertices-and-edges-1
-  "Makes sure the edges come before the vertices"
-  [children]
-  {:fx/type  :pane
-   :children (vec (sort-by (fn [view]
-                             (cond
-                               (edge-view? view)
-                               -1
-
-                               (vertex-view? view)
-                               (vertex-view->id view)))
-                           children))})
-
-#_(defn pane-of-vertices-and-edges-2
+(defn pane-of-vertices-and-edges
   "Makes sure the edges come before the vertices"
   [children]
   {:fx/type  :pane
    :children (vec (sort (fn [view-a view-b]
-                             (cond
-                               (edge-view? view)
-                               -1
+                          (cond
+                            ;; Edge views come first so vertex views can draw over them
+                            (and (edge-view? view-a) (vertex-view? view-b))
+                            -1
+                            (and (vertex-view? view-a) (edge-view? view-b))
+                            1
 
-                               (vertex-view? view)
-                               (vertex-view->id view)))
-                           children))})
+                            ;; No need for an opinion on the ordering of edge views
+                            (and (edge-view? view-a) (edge-view? view-b))
+                            0
+
+                            ;; If its a number underneath, lets use that ordering
+                            (and (vertex-view? view-a) (vertex-view? view-b))
+                            (compare (vertex-view->ordered-int view-a) (vertex-view->ordered-int view-b))
+
+                            :else
+                            0
+                            ))
+                        children))})
 
 (def error-message
   {:fx/type  :stack-pane
@@ -174,7 +194,7 @@
         view-edges (->edge-views g coords)
         view-arrows (->arrow-views g coords)
         widgets (concat view-vertices view-edges view-arrows)]
-    (pane-of-vertices-and-edges-1 widgets)))
+    (pane-of-vertices-and-edges widgets)))
 
 (defn graph->component [g]
   (let [coords (ham/graph->coords g)]

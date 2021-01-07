@@ -17,7 +17,7 @@
            :dev       {:extra-paths ["src/dev"]
                        :extra-deps  {org.clojure/tools.namespace {:mvn/version "0.3.1"}}}
            :example   {:extra-paths ["src/example"]
-                       :extra-deps  {vlaaad/reveal    {:mvn/version "RELEASE"}
+                       :extra-deps  {vlaaad/reveal    {:mvn/version "1.2.184"}
                                      cjmurphy/dev-lib {:mvn/version "0.4.0"}
                                      }
                        }

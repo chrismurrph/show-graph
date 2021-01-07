@@ -1,7 +1,7 @@
 (ns au.com.seasoft.layout.ham
   (:require
+    [au.com.seasoft.layout.graph-key-swap :as graph-key-swap]
     [au.com.seasoft.graph.graph :as gr]
-    [au.com.seasoft.graph.util :as util]
     [com.fulcrologic.guardrails.core :refer [>defn => | ?]]
     [clojure.core.async :as async :refer [>! chan go go-loop alts!! timeout]]
     )
@@ -23,18 +23,19 @@
               })
 
 (defn node->interop-node [node]
-  (InteropNode. (util/kw->interop-id node)))
+  (assert (int? node) ["HAM only works when vertices are ints"])
+  (InteropNode. node))
 
 (defn edge->interop-edge [[source-node target-node]]
   (InteropEdge.
     (node->interop-node source-node) (node->interop-node target-node)))
 
-(defn graph->interop-graph [graph]
+(defn graph->interop-graph [strict-graph]
   (let [result (GenericGraph/create)
-        nodes (->> graph
+        nodes (->> strict-graph
                    gr/nodes
                    (map node->interop-node))
-        edges (->> graph
+        edges (->> strict-graph
                    gr/pair-edges
                    (map edge->interop-edge))]
     (doseq [node nodes]
@@ -43,13 +44,15 @@
       (.addEdge result edge))
     result))
 
-(defn interop-coords->coords-hof [g]
+(defn interop-coords->coords-hof [orig-graph int->k]
   (fn [^Map interop-coords]
     (reduce
       (fn [m map-entry]
         (let [^InteropNode interop-node (.getKey map-entry)
-              node-id (-> (.getId interop-node) str keyword)
-              targets-map (get g node-id)
+              int-id (.getId interop-node)
+              node-id (get int->k int-id)
+              ;_ (assert ((complement int?) node-id) ["For now no ints as node ids" int-id node-id int->k])
+              targets-map (get orig-graph node-id)
               ^Vector v (.getValue map-entry)
               _ (assert (= 2 (.getDimensions v)))
               x (.getCoordinate v 1)
@@ -91,10 +94,11 @@
                   [k (assoc v :x new-x :y new-y)])))
          (into {}))))
 
-(defn- -graph->coords
-  [g]
+(defn interop-graph->coords
+  "Will take some time and may not succeed. When fails returns nil. When succeeds returns how many aligns/advances
+  it took and the coordinates (where to place the nodes)"
+  [interop-graph]
   (let [{:keys [::alignment-attempts ::silent?]} options
-        interop-graph (graph->interop-graph g)
         interop-ham (InteropHAM/create interop-graph 2)
         perhaps-aligned-ham (InteropHAM/attemptToAlign interop-ham alignment-attempts silent?)]
     (when (.isAligned perhaps-aligned-ham)
@@ -117,11 +121,13 @@
         _ (assert (int? number-of-tries) ["number-of-tries not int?" number-of-tries])
         _ (assert (int? max-user-wait-time) ["max-user-wait-time not int?" max-user-wait-time])
         timeout-chan (timeout max-user-wait-time)
-        cs (repeatedly number-of-tries chan)]
+        cs (repeatedly number-of-tries chan)
+        [strict-graph int->k] (graph-key-swap/->graph g)
+        interop-graph (graph->interop-graph strict-graph)]
     (go-loop [cs cs
               ordinal 1]
       (when (seq cs)
-        (if-let [[counted coords :as res] (-graph->coords g)]
+        (if-let [[counted coords :as res] (interop-graph->coords interop-graph)]
           (do
             ;; Does an extra unnecessary one before alts picks up the already decided winner. Not a problem that needs
             ;; to be solved
@@ -132,12 +138,12 @@
             ;; Here we couldn't reach alignment after exhausting all the attempts/advances allowed,
             ;; so we start afresh on the next ordinal
             (recur (next cs) (inc ordinal))))))
-    (let [interop-coords->coords (interop-coords->coords-hof g)
-          [[counted coords ordinal] c] (alts!! (conj cs timeout-chan))]
+    (let [interop-coords->coords (interop-coords->coords-hof g int->k)
+          [[counted interop-coords ordinal] c] (alts!! (conj cs timeout-chan))]
       (if (not= c timeout-chan)
         (do
-          (debug "Winner is" (ordinal-text ordinal) "aligned after" counted "advances")
-          (-> coords
-              interop-coords->coords
-              scale-coords))
+          (debug "Winner is the" (ordinal-text ordinal) "aligned after" counted "advances")
+          (->> interop-coords
+               interop-coords->coords
+               scale-coords))
         (debug "Timed out at" max-user-wait-time "before any of the" number-of-tries "channels could align")))))
