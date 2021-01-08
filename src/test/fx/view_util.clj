@@ -21,7 +21,8 @@
   (throw (Error. msg)))
 
 (defn see-something-simply
-  "Don't use if supposed to be a Reveal component."
+  "Don't use if supposed to be a Reveal component, as you will get :cljfx.defaults/unhandled-map-event
+  due to the use of rx/popup-view, followed by an NPE. Just remove the rx/popup-view as a workaround."
   [something]
   (assert (map? something) "Nothing to see")
   (if (has-nils? something)
@@ -37,8 +38,15 @@
            :scene      {:fx/type :scene
                         :root    something}})))))
 
+(defmulti event-handler :event/type)
+
+(defmethod event-handler :default [e]
+  (prn e))
+
 (defn see-something-map-desc
-  "Don't use if supposed to be a Reveal component."
+  "Don't use if supposed to be a Reveal component, as you will get :cljfx.defaults/unhandled-map-event
+   due to the use of rx/popup-view. Fixed with a handler here but still get an NPE. Just remove the rx/popup-view
+   as a workaround. I would argue you s/be able to see the visualization even if it has not been called from Reveal."
   [something]
   (assert (map? something) "Nothing to see")
   (if (has-nils? something)
@@ -52,4 +60,5 @@
                                          :min-width  600
                                          :showing    true
                                          :scene      {:fx/type :scene
-                                                      :root    something}}))))))
+                                                      :root    something}}))
+        :opts {:fx.opt/map-event-handler event-handler}))))

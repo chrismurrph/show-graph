@@ -14,9 +14,11 @@
    ::edge-colour         Color/DARKCYAN})
 
 (defn vertex-view->props [view]
-  (->> view
-       :children
-       (some :value)))
+  (let [children (:children view)]
+    (or (some :value children)
+        ;; In a simple view a node doesn't have props as such. Also note that props can be anything, even a scalar,
+        ;; so we say 'props' (with single quotes)
+        (some :text children))))
 
 (defn vertex-view->ordered-int
   "When displayed it is what the user gave as the id, as a string, with the kw not showing the colon.
@@ -24,9 +26,9 @@
   So if the keywords were actually numbers then tabbing will go 1 10 11 12 2..., which is wrong.
   So here, just for the purposes of ordering, we return the underlying int? if that's what it is"
   [view]
-  (let [id (-> view
-               vertex-view->props
-               :id)
+  (let [props (vertex-view->props view)
+        _ (assert props ["No 'props' found in view" view])
+        id (or (:id props) props)
         id-as-int (cond
                     (keyword? id)
                     (let [s (util/kw->string id)]
@@ -39,12 +41,24 @@
                     (try (Long/parseLong id)
                          (catch Exception ex
                            nil)))]
-    (assert id ["Not found id from props" (vertex-view->props view)])
-    (if id-as-int
-      id-as-int
-      id)))
+    (or id-as-int id)))
 
-(defn vertex-view
+(defn vertex-view-simple
+  [{:keys [x y id] :as props}]
+  (let [radius (::ham/radius ham/options)
+        {:keys [::vertex-fill-colour ::vertex-label-colour ::vertex-rim-colour]} colour-options]
+    {:fx/type  :stack-pane
+     :layout-x x
+     :layout-y y
+     :children [{:fx/type :circle
+                 :fill    vertex-fill-colour
+                 :stroke  vertex-rim-colour
+                 :radius  radius}
+                {:fx/type   :label
+                 :text-fill vertex-label-colour
+                 :text      (util/->string id)}]}))
+
+(defn vertex-view-reveal
   [{:keys [x y id] :as props}]
   (let [radius (::ham/radius ham/options)
         {:keys [::vertex-fill-colour ::vertex-label-colour ::vertex-rim-colour]} colour-options]
@@ -64,10 +78,12 @@
                            :text      (util/->string id)}}]}))
 
 (defn ->vertex-views
-  [coords]
+  [coords reveal?]
   (->> coords
        (map (fn [[k v]]
-              (let [view (vertex-view v)]
+              (let [view (if reveal?
+                           (vertex-view-reveal v)
+                           (vertex-view-simple v))]
                 view)))))
 
 (defn edge-view-arrow [[x y :as central-point] rotate-by-degrees]
@@ -84,8 +100,8 @@
                  :stroke  edge-colour
                  :fill    edge-colour
                  :points  [(+ transform-x triangle-x-radius)
-                           (+ transform-y 0)
-                           (+ transform-x 0)
+                           transform-y
+                           transform-x
                            (+ transform-y (* triangle-y-radius 2))
                            (+ transform-x (* triangle-x-radius 2))
                            (+ transform-y (* triangle-y-radius 2))]}]}))
@@ -189,15 +205,15 @@
                :text    "Was not able to quickly create a nicely aligned graph. Is the graph connected?"
                :style   {:-fx-font-weight :bold}}]})
 
-(defn coords->component [g coords]
-  (let [view-vertices (->vertex-views coords)
+(defn coords->component [g coords reveal?]
+  (let [view-vertices (->vertex-views coords reveal?)
         view-edges (->edge-views g coords)
         view-arrows (->arrow-views g coords)
         widgets (concat view-vertices view-edges view-arrows)]
     (pane-of-vertices-and-edges widgets)))
 
-(defn graph->component [g]
+(defn graph->component [g reveal?]
   (let [coords (ham/graph->coords g)]
     (if coords
-      (coords->component g coords)
+      (coords->component g coords reveal?)
       error-message)))

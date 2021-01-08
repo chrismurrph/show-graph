@@ -7,9 +7,6 @@
     [au.com.seasoft.layout.ham :as ham]
     [au.com.seasoft.general.dev :as dev]))
 
-(defn graph [{:keys [data]}]
-  (layout-view/graph->component data))
-
 (action/defaction ::view:graph [x]
                   (when (graph/graph? x)
                     (fn []
@@ -20,7 +17,7 @@
                          :ref     state
                          :fn      (fn [coords]
                                     (if coords
-                                      (layout-view/coords->component g coords)
+                                      (layout-view/coords->component g coords true)
                                       layout-view/error-message))}))))
 
 

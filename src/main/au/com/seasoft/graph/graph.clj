@@ -20,7 +20,7 @@
 ;; We say that each vertex of a graph has many targets even thou we don't directly use the target spec here
 ;; (i.e. a tuple (::target) is equivalent to a map-entry (what have here under s/map-of))
 ;;
-(s/def ::graph (s/map-of ::vertex (s/map-of ::vertex map?)))
+(s/def ::graph (s/map-of ::vertex (s/map-of ::vertex any?)))
 
 (>defn nodes
   [g]

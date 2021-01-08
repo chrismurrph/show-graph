@@ -33,7 +33,7 @@
    :3  {:5 {:weight 6} :8 {:weight 2}}
    :6  {}})
 
-(def nodes-graph
+(def nodes-graph-1
   {:12 {}
    :11 {:12 {:weight 10}}
    :10 {:12 {:weight 3}}
@@ -47,7 +47,24 @@
    :3  {:4 {:weight 7} :5 {:weight 6} :8 {:weight 2}}
    :6  {}})
 
-(def ints-nodes-graph
+;;
+;; There's no reason for weight to be in a map. So test this
+;;
+(def nodes-graph-2
+  {:12 {}
+   :11 {:12 10}
+   :10 {:12 3}
+   :4  {:2 4 :7 5}
+   :7  {:6 1 :8 11}
+   :1  {:3 5}
+   :8  {:9 20}
+   :9  {:10 17 :11 5}
+   :2  {:1 10}
+   :5  {:6 9 :7 3}
+   :3  {:4 7 :5 6 :8 2}
+   :6  {}})
+
+(def ints-nodes-graph-1
   {12 {}
    11 {12 {:weight 10}}
    10 {12 {:weight 3}}
@@ -61,7 +78,21 @@
    3  {4 {:weight 7} 5 {:weight 6} 8 {:weight 2}}
    6  {}})
 
-(def letter-nodes-graph
+(def ints-nodes-graph-2
+  {12 {}
+   11 {12 10}
+   10 {12 3}
+   4  {2 4 7 5}
+   7  {6 1 8 11}
+   1  {3 5}
+   8  {9 20}
+   9  {10 17 11 5}
+   2  {1 10}
+   5  {6 9 7 3}
+   3  {4 7 5 6 8 2}
+   6  {}})
+
+(def letter-nodes-graph-1
   {:l {}
    :k {:l {:weight 10}}
    :j {:l {:weight 3}}
@@ -74,6 +105,20 @@
    :e  {:f {:weight 9} :g {:weight 3}}
    :c  {:d {:weight 7} :e {:weight 6} :h {:weight 2}}
    :f  {}})
+
+(def letter-nodes-graph-2
+  {:l {}
+   :k {:l 10}
+   :j {:l 3}
+   :d {:b 4 :g 5}
+   :g {:f 1 :h 11}
+   :a {:c 5}
+   :h {:i 20}
+   :i {:j 17 :k 5}
+   :b {:a 10}
+   :e {:f 9 :g 3}
+   :c {:d 7 :e 6 :h 2}
+   :f {}})
 
 (def not-connected-graph
   ":8 does not go to :9, hence there are 2 islands. Can't be drawn by the algorithm we use so the error message
@@ -96,4 +141,4 @@
        [:4 {:3 {:weight 2}}]]])
 
 (comment
-  (tap> nodes-graph))
+  (tap> nodes-graph-1))

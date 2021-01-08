@@ -2,7 +2,7 @@
   (:require
     [au.com.seasoft.graph.example-data :as example-data]))
 
-(def example-graph example-data/nodes-graph)
+(def example-graph example-data/letter-nodes-graph-2)
 
 ;;
 ;; Load these two snippets one after the other in order then press <enter> and select :view/graph to set
