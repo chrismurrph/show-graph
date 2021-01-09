@@ -46,37 +46,47 @@
 
 (defn vertex-view-simple
   [{:keys [x y id] :as props}]
-  (let [radius (::ham/radius ham/options)
+  (let [text (util/->string id)
+        len (count text)
+        radius (::ham/radius ham/options)
         {:keys [::vertex-fill-colour ::vertex-label-colour ::vertex-rim-colour]} colour-options]
-    {:fx/type  :stack-pane
-     :layout-x x
-     :layout-y y
-     :children [{:fx/type :circle
-                 :fill    vertex-fill-colour
-                 :stroke  vertex-rim-colour
-                 :radius  radius}
-                {:fx/type   :label
-                 :text-fill vertex-label-colour
-                 :text      (util/->string id)}]}))
+    (cond-> {:fx/type  :stack-pane
+             :layout-x x
+             :layout-y y
+             :children [{:fx/type :circle
+                         :fill    vertex-fill-colour
+                         :stroke  vertex-rim-colour
+                         :radius  radius}
+                        {:fx/type   :label
+                         :text-fill vertex-label-colour
+                         :text      text}]}
+            (> len 3) (assoc :alignment :center-left))))
 
+;;
+;; Haven't done it b/c almost too silly, but when spreading the label to the right we could give it a little
+;; bit of its own margin. In :style of :label one of these coords to 1 and the rest to zero:
+;; :-fx-padding [0 2 0 2]
+;;
 (defn vertex-view-reveal
   [{:keys [x y id] :as props}]
-  (let [radius (::ham/radius ham/options)
+  (let [text (util/->string id)
+        len (count text)
+        radius (::ham/radius ham/options)
         {:keys [::vertex-fill-colour ::vertex-label-colour ::vertex-rim-colour]} colour-options]
-    ;(println (str "In vertex-view for props" props))
-    {:fx/type  :stack-pane
-     :layout-x x
-     :layout-y y
-     ;; Important that the label comes last so the user can visually tab to it
-     :children [{:fx/type :circle
-                 :fill    vertex-fill-colour
-                 :stroke  vertex-rim-colour
-                 :radius  radius}
-                {:fx/type rx/popup-view
-                 :value   props
-                 :desc    {:fx/type   :label
-                           :text-fill vertex-label-colour
-                           :text      (util/->string id)}}]}))
+    (cond-> {:fx/type  :stack-pane
+             :layout-x x
+             :layout-y y
+             ;; Important that the label comes last so the user can visually tab to it
+             :children [{:fx/type :circle
+                         :fill    vertex-fill-colour
+                         :stroke  vertex-rim-colour
+                         :radius  radius}
+                        {:fx/type rx/popup-view
+                         :value   props
+                         :desc    {:fx/type   :label
+                                   :text-fill vertex-label-colour
+                                   :text      text}}]}
+            (> len 3) (assoc :alignment :center-left))))
 
 (defn ->vertex-views
   [coords reveal?]

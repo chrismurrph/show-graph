@@ -1,9 +1,6 @@
 (ns au.com.seasoft.graph.util)
 
-(def max-visible-len
-  "Currently we clip what the user sees. This isn't great. See journey.md for a way forward. At the moment
-  anything more than 3 shifts the circle to the right noticeably"
-  3)
+(def max-visible-len 30)
 
 (defn kw->string [kw]
   (->> (subs (str kw) 1)
