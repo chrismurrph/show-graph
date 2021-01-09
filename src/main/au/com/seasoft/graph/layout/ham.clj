@@ -15,11 +15,10 @@
 
 (def options {::radius             10
               ::margin             10
-              ::magnify            20
-              ::alignment-attempts 150
+              ::alignment-attempts 200
               ::silent?            true
-              ::number-of-tries    30
-              ::max-user-wait-time 1000
+              ::number-of-tries    40
+              ::max-user-wait-time 2000
               })
 
 (defn node->interop-node [node]
@@ -78,7 +77,8 @@
   Apply a margin after that."
   [coords]
   (let [origin-shift 10
-        {:keys [::radius ::margin ::magnify]} options
+        {:keys [::radius ::margin]} options
+        magnify (max 20 (count coords))
         coords (->> coords
                     (map (fn [[k v]]
                            (let [{:keys [x y]} v
@@ -129,11 +129,9 @@
       (when (seq cs)
         (if-let [[counted coords :as res] (interop-graph->coords interop-graph)]
           (do
-            ;; Does an extra unnecessary one before alts picks up the already decided winner. Not a problem that needs
-            ;; to be solved
             (debug "Aligned" (ordinal-text ordinal) "after" counted "advances")
             (>! (first cs) (conj res ordinal))
-            (recur (next cs) (inc ordinal)))
+            )
           (do
             ;; Here we couldn't reach alignment after exhausting all the attempts/advances allowed,
             ;; so we start afresh on the next ordinal

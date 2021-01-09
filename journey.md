@@ -42,3 +42,13 @@ filter out the edge lookups found by a topological sort?? Getting complicated...
 connected if every node comes off the root. Then the nodes only used by the root can be removed. To get 'only used'
 reverse the graph.       
 
+Ha - way to go with Fulcro is to have the class part of the ident as a node. Use a different arrow when pointing to
+a many. So every entity/class an instance rather than entity instance/record. 
+But there's no point in doing Fulcro anyway - already has F Inspect and other tools... 
+
+Currently we are clipping the text at 3 and it is going into a circle. A stack pane does this nicely. But what if
+we wanted to see the whole word? Then it would make sense if the circle and label were both aligned to the left,
+rather than the circle going to the middle of the label as will happen with a stack pane. Change max-visible-len
+to 30 (from 3) and look at ints-nodes-graph-2 to see what I mean - it looks like the arrows are going to the 
+correct place but the circle has crept to the right. Will need time and experimentation to get this right so leaving
+it for now. There must be a trick. Using a group?

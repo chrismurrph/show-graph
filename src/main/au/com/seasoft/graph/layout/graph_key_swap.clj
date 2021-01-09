@@ -2,8 +2,7 @@
   "The HAM only works with int? keys yet we accept any keys"
   (:require
     [com.fulcrologic.guardrails.core :refer [>defn => | ?]]
-    [au.com.seasoft.graph.example-data :as example-data]
-    [au.com.seasoft.general.dev :as dev]))
+    ))
 
 (>defn convert-targets
   [m k->int]

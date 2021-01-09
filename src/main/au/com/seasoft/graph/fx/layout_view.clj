@@ -4,7 +4,8 @@
     [au.com.seasoft.graph.graph :as gr]
     [au.com.seasoft.graph.util :as util]
     [au.com.seasoft.graph.layout.math :as math]
-    [vlaaad.reveal.ext :as rx])
+    [vlaaad.reveal.ext :as rx]
+    [au.com.seasoft.general.dev :as dev])
   (:import [javafx.scene.paint Color]))
 
 (def colour-options
@@ -136,16 +137,6 @@
   (assert (number? y) ["Expected a map with :y in it" props])
   [(+ amount x) (+ amount y)])
 
-;; Also dev-lib so use that when after deploy 0.5.0 of dev-lib
-(defn safe-get [m k]
-  (assert (map? m) ["safe-get expected to be used on a map" m])
-  (assert (seq m) ["nothing in the map so what's the point?" m])
-  (assert k ["key is nil" k m])
-  (let [res (get m k)]
-    (if (some? res)
-      res
-      (throw (ex-info "Could not find key in map" {:key k :map-keys (keys m)})))))
-
 (defn ->edge-views
   "Get all the edges from the graph. Then replace the 2 nodes of each with [x y]. Then have enough for an edge-view if
   alter for the radius"
@@ -153,7 +144,7 @@
   (let [radius (::ham/radius ham/options)]
     (->> (gr/pair-edges graph)
          (map (fn [[source target]]
-                [(safe-get coords source) (safe-get coords target)]))
+                [(dev/safe-get coords source) (dev/safe-get coords target)]))
          (map (fn [[from to]]
                 (edge-view (shift-point radius from) (shift-point radius to)))))))
 
@@ -168,11 +159,16 @@
          (map (fn [[from to]]
                 (triangle-view (shift-point radius from) (shift-point radius to)))))))
 
-(defn edge-view? [{:fx/keys [type]}]
+(defn -edge-view? [{:fx/keys [type]}]
   (= :path type))
 
 (defn vertex-view? [{:fx/keys [type]}]
   (= :stack-pane type))
+
+(defn -arrow-view? [{:keys [rotate] :fx/keys [type]}]
+  (and rotate (= :group type)))
+
+(def background-view? (some-fn -edge-view? -arrow-view?))
 
 (defn pane-of-vertices-and-edges
   "Makes sure the edges come before the vertices"
@@ -181,13 +177,13 @@
    :children (vec (sort (fn [view-a view-b]
                           (cond
                             ;; Edge views come first so vertex views can draw over them
-                            (and (edge-view? view-a) (vertex-view? view-b))
+                            (and (background-view? view-a) (vertex-view? view-b))
                             -1
-                            (and (vertex-view? view-a) (edge-view? view-b))
+                            (and (vertex-view? view-a) (background-view? view-b))
                             1
 
                             ;; No need for an opinion on the ordering of edge views
-                            (and (edge-view? view-a) (edge-view? view-b))
+                            (and (background-view? view-a) (background-view? view-b))
                             0
 
                             ;; If its a number underneath, lets use that ordering
@@ -214,7 +210,9 @@
         view-edges (->edge-views g coords)
         view-arrows (->arrow-views g coords)
         widgets (concat view-vertices view-edges view-arrows)]
-    (pane-of-vertices-and-edges widgets)))
+    {:fx/type      :scroll-pane
+     :fit-to-width true
+     :content      (pane-of-vertices-and-edges widgets)}))
 
 (defn graph->component [g reveal?]
   (let [coords (ham/graph->coords g)]

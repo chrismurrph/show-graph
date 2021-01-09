@@ -1,6 +1,6 @@
 (ns user
   (:require
-    [au.com.seasoft.reveal.view]
+    [au.com.seasoft.graph.reveal.view]
     [clojure.pprint :refer [pprint]]
     [clojure.stacktrace :as st]
     [clojure.tools.namespace.repl :as tools-ns :refer [set-refresh-dirs]]

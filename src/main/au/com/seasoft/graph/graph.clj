@@ -44,7 +44,9 @@
                  (keys m))
                (vals g))))
 
-(defn graph? [x]
+(defn graph?
+  "Is it a reasonable graph, suitable for display? (by Reveal usually)"
+  [x]
   (let [nodes (-> x keys set)
         res (and (map? x)
                  (-> x vals first map?)
