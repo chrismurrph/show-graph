@@ -1,6 +1,6 @@
-(ns layout.graph-key-swap-test
+(ns graph.layout.graph-key-swap-test
   (:require
-    [au.com.seasoft.layout.graph-key-swap :as graph-key-swap]
+    [au.com.seasoft.graph.layout.graph-key-swap :as graph-key-swap]
     [clojure.test :refer :all]
     [au.com.seasoft.general.dev :as dev]
     [au.com.seasoft.graph.example-data :as example-data]))

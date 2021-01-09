@@ -1,9 +1,9 @@
-(ns au.com.seasoft.fx.layout-view
+(ns au.com.seasoft.graph.fx.layout-view
   (:require
-    [au.com.seasoft.layout.ham :as ham]
+    [au.com.seasoft.graph.layout.ham :as ham]
     [au.com.seasoft.graph.graph :as gr]
     [au.com.seasoft.graph.util :as util]
-    [au.com.seasoft.layout.math :as math]
+    [au.com.seasoft.graph.layout.math :as math]
     [vlaaad.reveal.ext :as rx])
   (:import [javafx.scene.paint Color]))
 
@@ -192,7 +192,11 @@
 
                             ;; If its a number underneath, lets use that ordering
                             (and (vertex-view? view-a) (vertex-view? view-b))
-                            (compare (vertex-view->ordered-int view-a) (vertex-view->ordered-int view-b))
+                            (let [a (vertex-view->ordered-int view-a)
+                                  b (vertex-view->ordered-int view-b)]
+                              (if (= (type a) (type b))
+                                (compare a b)
+                                0))
 
                             :else
                             0

@@ -1,4 +1,4 @@
-(ns au.com.seasoft.layout.math)
+(ns au.com.seasoft.graph.layout.math)
 
 (defn abs [^double n]
   (Math/abs n))

@@ -1,4 +1,4 @@
-(ns au.com.seasoft.layout.graph-key-swap
+(ns au.com.seasoft.graph.layout.graph-key-swap
   "The HAM only works with int? keys yet we accept any keys"
   (:require
     [com.fulcrologic.guardrails.core :refer [>defn => | ?]]

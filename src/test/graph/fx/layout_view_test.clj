@@ -1,9 +1,9 @@
-(ns fx.layout-view-test
+(ns graph.fx.layout-view-test
   (:require
-    [fx.view-util :as view-util]
-    [au.com.seasoft.fx.layout-view :as layout-view]
-    [clojure.test :refer :all]
-    [au.com.seasoft.graph.example-data :as example-data]))
+    [graph.fx.view-util :as view-util]
+    [au.com.seasoft.graph.example-data :as example-data]
+    [au.com.seasoft.graph.fx.layout-view :as layout-view]
+    [clojure.test :refer :all]))
 
 (deftest vertex-view-index
   (is (= (-> (layout-view/vertex-view-simple {:x 10 :y 10 :id :3})

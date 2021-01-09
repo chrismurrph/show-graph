@@ -1,4 +1,4 @@
-(ns fx.view-util
+(ns graph.fx.view-util
   (:require
     [cljfx.api :as fx]
     [com.rpl.specter :as sp]

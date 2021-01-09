@@ -1,10 +1,10 @@
-(ns au.com.seasoft.reveal.view
+(ns au.com.seasoft.graph.reveal.view
   (:require
-    [au.com.seasoft.fx.layout-view :as layout-view]
+    [au.com.seasoft.graph.fx.layout-view :as layout-view]
     [au.com.seasoft.graph.graph :as graph]
     [vlaaad.reveal.action :as action]
     [vlaaad.reveal.ext :as rx]
-    [au.com.seasoft.layout.ham :as ham]
+    [au.com.seasoft.graph.layout.ham :as ham]
     [au.com.seasoft.general.dev :as dev]))
 
 (action/defaction ::view:graph [x]

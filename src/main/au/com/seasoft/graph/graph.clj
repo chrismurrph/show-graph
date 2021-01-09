@@ -50,5 +50,5 @@
                  (-> x vals first map?)
                  (s/valid? ::graph x)
                  (clojure.set/subset? (nodes-in-edges x) nodes))]
-    (dev/log-off "graph?" res nodes (nodes-in-edges x))
+    (dev/log-off "graph?" res nodes (nodes-in-edges x) "subset?" (clojure.set/subset? (nodes-in-edges x) nodes))
     res))

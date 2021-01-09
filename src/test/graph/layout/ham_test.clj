@@ -1,6 +1,6 @@
-(ns layout.ham-test
+(ns graph.layout.ham-test
   (:require
-    [au.com.seasoft.layout.ham :as ham]
+    [au.com.seasoft.graph.layout.ham :as ham]
     [clojure.test :refer :all])
   (:import (au.com.seasoft.ham InteropEdge InteropNode)))
 

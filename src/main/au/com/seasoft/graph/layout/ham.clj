@@ -1,6 +1,6 @@
-(ns au.com.seasoft.layout.ham
+(ns au.com.seasoft.graph.layout.ham
   (:require
-    [au.com.seasoft.layout.graph-key-swap :as graph-key-swap]
+    [au.com.seasoft.graph.layout.graph-key-swap :as graph-key-swap]
     [au.com.seasoft.graph.graph :as gr]
     [com.fulcrologic.guardrails.core :refer [>defn => | ?]]
     [clojure.core.async :as async :refer [>! chan go go-loop alts!! timeout]]
