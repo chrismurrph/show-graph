@@ -47,10 +47,11 @@
 (defn graph?
   "Is it a reasonable graph, suitable for display? (by Reveal usually)"
   [x]
-  (let [nodes (-> x keys set)
-        res (and (map? x)
-                 (-> x vals first map?)
-                 (s/valid? ::graph x)
-                 (clojure.set/subset? (nodes-in-edges x) nodes))]
-    (dev/log-off "graph?" res nodes (nodes-in-edges x) "subset?" (clojure.set/subset? (nodes-in-edges x) nodes))
-    res))
+  (or (s/valid? (s/coll-of ::pair) x)
+      (let [nodes (-> x keys set)
+            res (and (map? x)
+                     (-> x vals first map?)
+                     (s/valid? ::graph x)
+                     (clojure.set/subset? (nodes-in-edges x) nodes))]
+        (dev/log-off "graph?" res nodes (nodes-in-edges x) "subset?" (clojure.set/subset? (nodes-in-edges x) nodes))
+        res)))

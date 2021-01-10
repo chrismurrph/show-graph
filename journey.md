@@ -52,3 +52,7 @@ rather than the circle going to the middle of the label as will happen with a st
 to 30 (from 3) and look at ints-nodes-graph-2 to see what I mean - it looks like the arrows are going to the 
 correct place but the circle has crept to the right. Will need time and experimentation to get this right so leaving
 it for now. There must be a trick. Using a group?
+
+Okay I fixed that problem easily - stack-pane very sensibly has alignment ability. We are now clipping at 30.
+
+I've created an issue for the only thing left - user will want to select nodes with the mouse.

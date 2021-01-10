@@ -60,13 +60,11 @@
                         {:fx/type   :label
                          :text-fill vertex-label-colour
                          :text      text}]}
-            (> len 3) (assoc :alignment :center-left))))
+            (> len 3) ((fn [stack-pane]
+                         (-> stack-pane
+                             (assoc :alignment :center-left)
+                             (assoc-in [:children 1 :style] {:-fx-padding [0 0 0 4]})))))))
 
-;;
-;; Haven't done it b/c almost too silly, but when spreading the label to the right we could give it a little
-;; bit of its own margin. In :style of :label one of these coords to 1 and the rest to zero:
-;; :-fx-padding [0 2 0 2]
-;;
 (defn vertex-view-reveal
   [{:keys [x y id] :as props}]
   (let [text (util/->string id)
@@ -86,7 +84,10 @@
                          :desc    {:fx/type   :label
                                    :text-fill vertex-label-colour
                                    :text      text}}]}
-            (> len 3) (assoc :alignment :center-left))))
+            (> len 3) ((fn [stack-pane]
+                         (-> stack-pane
+                             (assoc :alignment :center-left)
+                             (assoc-in [:children 1 :desc :style] {:-fx-padding [0 0 0 4]})))))))
 
 (defn ->vertex-views
   [coords reveal?]
@@ -180,6 +181,22 @@
 
 (def background-view? (some-fn -edge-view? -arrow-view?))
 
+(defn ->type-order
+  "Only used when the comparison is between 2 different types"
+  [x]
+  (cond
+    (string? x) 3
+    (keyword? x) 2
+    (number? x) 1
+    :else 0))
+
+(defn diff-types-order
+  "string? comes before keyword? comes before number?"
+  [a b]
+  (let [a-order (->type-order a)
+        b-order (->type-order b)]
+    (- b-order a-order)))
+
 (defn pane-of-vertices-and-edges
   "Makes sure the edges come before the vertices"
   [children]
@@ -202,7 +219,7 @@
                                   b (vertex-view->ordered-int view-b)]
                               (if (= (type a) (type b))
                                 (compare a b)
-                                0))
+                                (diff-types-order a b)))
 
                             :else
                             0
@@ -216,7 +233,9 @@
                :style   {:-fx-font-weight :bold}}]})
 
 (defn coords->component [g coords reveal?]
-  (let [view-vertices (->vertex-views coords reveal?)
+  (let [g (cond->> g
+                   ((complement map?) g) (into {}))
+        view-vertices (->vertex-views coords reveal?)
         view-edges (->edge-views g coords)
         view-arrows (->arrow-views g coords)
         widgets (concat view-vertices view-edges view-arrows)]
@@ -225,7 +244,9 @@
      :content      (pane-of-vertices-and-edges widgets)}))
 
 (defn graph->component [g reveal?]
-  (let [coords (ham/graph->coords g)]
+  (let [g (cond->> g
+                   ((complement map?) g) (into {}))
+        coords (ham/graph->coords g)]
     (if coords
       (coords->component g coords reveal?)
       error-message)))

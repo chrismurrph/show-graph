@@ -1,7 +1,7 @@
 (ns au.com.seasoft.graph.example-data
   "Example data used in tests")
 
-(def simple-graph
+(def simple-graph-1
   "Canonical form now using. Easier to update and order of the target nodes is not important so using a map
   represents that fact better. It is a ::gr/graph"
   {:1 {:2 {:weight 1} :3 {:weight 2}}
@@ -91,6 +91,41 @@
    5  {6 9 7 3}
    3  {4 7 5 6 8 2}
    6  {}})
+
+(def simple-graph-2
+  [[:1 {:2 {:weight 1} :3 {:weight 2}}]
+   [:2 {:4 {:weight 4}}]
+   [:3 {:4 {:weight 2}}]
+   [:4 {}]
+   ])
+
+(def ints-nodes-graph-3
+  [[12123 {}]
+   [11 {12123 10}]
+   [10 {12123 3}]
+   [4 {2 4 7 5}]
+   [7 {6 1 8 11}]
+   [1 {3 5}]
+   [8 {"word" 20}]
+   ["word" {10 17 11 5}]
+   [2 {1 10}]
+   [5 {6 9 7 3}]
+   [3 {4 7 5 6 8 2}]
+   [6 {}]])
+
+(def ints-nodes-graph-4
+  [[12123 []]
+   [11 [[12123 10]]]
+   [10 [[12123 3]]]
+   [4 [[2 4] [7 5]]]
+   [7 [[6 1] [8 11]]]
+   [1 [[3 5]]]
+   [8 [["word" 20]]]
+   ["word" [[10 17] [11 5]]]
+   [2 [[1 10]]]
+   [5 [[6 9] [7 3]]]
+   [3 [[4 7] [5 6] [8 2]]]
+   [6 []]])
 
 (def letter-nodes-graph-1
   {:ll {}

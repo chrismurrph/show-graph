@@ -4,7 +4,7 @@
     [au.com.seasoft.graph.graph :as gr]
     [com.fulcrologic.guardrails.core :refer [>defn => | ?]]
     [clojure.core.async :as async :refer [>! chan go go-loop alts!! timeout]]
-    )
+    [au.com.seasoft.general.dev :as dev])
   (:import
     [au.com.seasoft.ham GenericGraph InteropNode InteropEdge InteropHAM]
     [com.syncleus.dann.math Vector]
@@ -50,8 +50,11 @@
         (let [^InteropNode interop-node (.getKey map-entry)
               int-id (.getId interop-node)
               node-id (get int->k int-id)
-              ;_ (assert ((complement int?) node-id) ["For now no ints as node ids" int-id node-id int->k])
-              targets-map (get orig-graph node-id)
+              node-props (dev/safe-get orig-graph node-id)
+              targets-map (cond
+                            (map? node-props) node-props
+                            (seq node-props) (into {} node-props)
+                            :else (throw (ex-info "Got unexpected result from original graph" {:node-id node-id :result node-props})))
               ^Vector v (.getValue map-entry)
               _ (assert (= 2 (.getDimensions v)))
               x (.getCoordinate v 1)
@@ -82,6 +85,7 @@
         coords (->> coords
                     (map (fn [[k v]]
                            (let [{:keys [x y]} v
+                                 _ (assert x ["No x and y in v" v])
                                  new-x (+ radius (* (+ x origin-shift) magnify))
                                  new-y (+ radius (* (+ y origin-shift) magnify))]
                              [k (assoc v :x new-x :y new-y)]))))

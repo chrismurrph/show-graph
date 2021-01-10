@@ -22,8 +22,6 @@ archive
 figwheel_server.log
 lein-template.iml
 node_modules
-pom.xml
-pom.xml.asc
 resources/public/js
 resources/public/bootstrap-3.3.7
 resources/public/bootstrap-4.1.2

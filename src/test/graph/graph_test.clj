@@ -10,7 +10,7 @@
      (is = (graph/nodes-in-edges example/nodes-graph-1))))
 
 (deftest all-example-graphs-are-graphs
-  (is = (every? graph/graph? [example/simple-graph example/full-graph example/nodes-graph-1 example/unreachable-nodes-graph])))
+  (is = (every? graph/graph? [example/simple-graph-1 example/full-graph example/nodes-graph-1 example/unreachable-nodes-graph])))
 
 (comment
   (run-tests)

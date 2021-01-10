@@ -1,7 +1,8 @@
 (ns graph.layout.ham-test
   (:require
     [au.com.seasoft.graph.layout.ham :as ham]
-    [clojure.test :refer :all])
+    [clojure.test :refer :all]
+    [au.com.seasoft.graph.example-data :as example-data])
   (:import (au.com.seasoft.ham InteropEdge InteropNode)))
 
 (deftest interop-node-id
