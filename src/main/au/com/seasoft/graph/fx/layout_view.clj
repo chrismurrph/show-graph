@@ -155,7 +155,7 @@
   (let [radius (::ham/radius ham/options)]
     (->> (gr/pair-edges graph)
          (map (fn [[source target]]
-                [(dev/safe-get coords source) (dev/safe-get coords target)]))
+                [(get coords source) (get coords target)]))
          (map (fn [[from to]]
                 (edge-view (shift-point radius from) (shift-point radius to)))))))
 

@@ -50,7 +50,7 @@
         (let [^InteropNode interop-node (.getKey map-entry)
               int-id (.getId interop-node)
               node-id (get int->k int-id)
-              node-props (dev/safe-get orig-graph node-id)
+              node-props (get orig-graph node-id)
               targets-map (cond
                             (map? node-props) node-props
                             (seq node-props) (into {} node-props)

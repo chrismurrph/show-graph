@@ -44,8 +44,9 @@
                  (keys m))
                (vals g))))
 
-(defn graph?
-  "Is it a reasonable graph, suitable for display? (by Reveal usually)"
+(defn graph-lenient?
+  "Is it a reasonable graph, suitable for display? (by Reveal usually). Go back to this when issue #2 is fixed.
+  Also will be time to have the subset code below tested for both"
   [x]
   (or (s/valid? (s/coll-of ::pair) x)
       (let [nodes (-> x keys set)
@@ -53,5 +54,15 @@
                      (-> x vals first map?)
                      (s/valid? ::graph x)
                      (clojure.set/subset? (nodes-in-edges x) nodes))]
-        (dev/log-off "graph?" res nodes (nodes-in-edges x) "subset?" (clojure.set/subset? (nodes-in-edges x) nodes))
         res)))
+
+(defn graph?
+  "Is it a reasonable graph, suitable for display? (by Reveal usually)"
+  [x]
+  (let [nodes (-> x keys set)
+        res (and (map? x)
+                 (-> x vals first map?)
+                 (s/valid? ::graph x)
+                 (clojure.set/subset? (nodes-in-edges x) nodes))]
+    ;(dev/log-off "graph?" res nodes (nodes-in-edges x) "subset?" (clojure.set/subset? (nodes-in-edges x) nodes))
+    res))

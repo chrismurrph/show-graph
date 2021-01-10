@@ -18,10 +18,12 @@
   (view-util/see-component-simply (layout-view/edge-view-arrow [20 50] 90)))
 
 (defn see-graph []
+  "As reported in issue #2 we can see simple-graph-2 when it not not part of Reveal
+  (the `false` arg to graph->component)"
   (view-util/see-component-simply (layout-view/graph->component example-data/simple-graph-2 false)))
 
 (defn see-graph-data-structure []
-  (dev/pp (->> (layout-view/graph->component example-data/simple-graph-2 false)
+  (dev/pp (->> (layout-view/graph->component example-data/simple-graph-1 false)
                :content
                :children
                (filterv (fn [{:keys [alignment] :fx/keys [type]}]
