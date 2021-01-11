@@ -28,9 +28,17 @@ This data structure will be recognised as a graph:
 ```
 ![displayed graph](reveal_with_graph.png?raw=true)
 
-Note that many variations are possible. Here a node is a keyword, but could just as easily be a string or number.
-You can mix and match the types of the nodes as well. Here `{:weight 1}` is the properties for the directed edge
-:1 -> :2, but we could have put just `1`.
+Note that many variations are possible. Here a node/vertex is a keyword, but could just as easily be a string or number.
+You can mix and match the types of the nodes as well - for example a few or all of them could be strings. Although
+the representation of a node is a circle, long labels (up to 30 characters) can run outside the circle. 
 
-Another variation that is in the works is for the data structure not to be a map but a collection of tuples. We've
-hit a snag (see issues #2) on this that should be resolved soon.  
+Here `{:weight 1}` is the properties for the directed edge :1 -> :2, but we could have just put `1`. These properties
+are just going along for the ride - they don't need to be read when laying out a graph. All that Show Graph needs to 
+discover is the edges that run between the vertices. 
+
+Another variation that's 'in the works' is for the data structure not to be a map but a coll of tuples. We've
+hit a snag (see issues #2) on this that will hopefully be resolved soon.
+
+### Is it useful?
+
+Not sure! But it might help your assessment to know that when focused on a node you can re-activate Reveal.  
