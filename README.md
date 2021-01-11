@@ -15,7 +15,7 @@ as per usual and any data structures that conform to `au.com.seasoft.graph.graph
 `:view/graph` on the context menu. Take care that you bring up the context menu when you are on the opening `{` 
 of the graph data structure.
 
-# Data Structure
+### Data Structure
 
 This data structure will be recognised as a graph:
 
@@ -26,10 +26,11 @@ This data structure will be recognised as a graph:
  :4 {}
 }
 ```
+![displayed graph](reveal_with_graph.png?raw=true)
 
 Note that many variations are possible. Here a node is a keyword, but could just as easily be a string or number.
 You can mix and match the types of the nodes as well. Here `{:weight 1}` is the properties for the directed edge
 :1 -> :2, but we could have put just `1`.
 
 Another variation that is in the works is for the data structure not to be a map but a collection of tuples. We've
-hit a snag (see issues #1) on this that should be resolved soon.  
+hit a snag (see issues #2) on this that should be resolved soon.  

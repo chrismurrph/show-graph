@@ -1,5 +1,9 @@
 (ns au.com.seasoft.graph.example-data
-  "Example data used in tests")
+  "Example data used in tests and example")
+
+;; TODO
+;; Put some of these under example and some under test, even replicating if necessary. Have tests for all so
+;; that all have a purpose (or get rid of them).
 
 (def simple-graph-1
   "Canonical form now using. Easier to update and order of the target nodes is not important so using a map

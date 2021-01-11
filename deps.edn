@@ -24,5 +24,5 @@
            :depstar {:extra-deps {seancorfield/depstar {:mvn/version "1.1.104"}}}
            :deploy {:extra-deps {slipset/deps-deploy {:mvn/version "RELEASE"}}
                     :main-opts ["-m" "deps-deploy.deps-deploy" "deploy"
-                                "dev-lib.jar"]}
+                                "show-graph.jar"]}
            }}
