@@ -10,7 +10,7 @@ To see it working in Reveal follow these instructions:
 - Follow the instructions there...
 
 This library gives `:view/graph` (current name) capability to Reveal. In your own application depend on this library 
-in a development only deps.edn alias and make sure that `au.com.seasoft.reveal.view` is required. Then use Reveal 
+in a development only deps.edn alias and make sure that `au.com.seasoft.graph.reveal.view` is required. Then use Reveal 
 as per usual and any data structures that conform to `au.com.seasoft.graph.graph/graph?` will show the action 
 `:view/graph` on the context menu. Take care that you bring up the context menu when you are on the opening `{` 
 of the graph data structure.
@@ -32,13 +32,22 @@ Note that many variations are possible. Here a node/vertex is a keyword, but cou
 You can mix and match the types of the nodes as well - for example a few or all of them could be strings. Although
 the representation of a node is a circle, long labels (up to 30 characters) can run outside the circle. 
 
-Here `{:weight 1}` is the properties for the directed edge :1 -> :2, but we could have just put `1`. These properties
-are just going along for the ride - they don't need to be read when laying out a graph. All that Show Graph needs to 
-discover is the edges that run between the vertices. 
+Here `{:weight 1}` is the properties map for the directed edge :1 -> :2, but we could have just put `1` - no map at all.
+These 'properties' are just going along for the ride - they don't need to be read when laying out a graph. All that 
+Show Graph needs to discover is the edges that run between the vertices. 
 
 Another variation that's 'in the works' is for the data structure not to be a map but a coll of tuples. We've
 hit a snag (see issues #2) on this that will hopefully be resolved soon.
 
 ### Is it useful?
 
-Not sure! But it might help your assessment to know that when focused on a node you can re-activate Reveal.  
+Not sure! But it might help your assessment to know that when focused on a node you can re-activate Reveal. So if
+node `:1` had the focus pressing the enter key would activate Reveal on the properties map of node `:1` which
+is `{:2 {:weight 1} :3 {:weight 2}}`.    
+
+### Is it significant?
+
+This library (cjmurphy/show-graph) depends on a Java library called cjmurphy/ham which contains an algorithm called
+HyperassociativeMap, which determines the placement of the nodes. I don't believe that open source Clojure 
+code has been able to do this before. Please let me know if in fact I'm wrong and there are other such algorithms 
+easily callable from Clojure, or even written in Clojure.   

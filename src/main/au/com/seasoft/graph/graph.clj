@@ -2,8 +2,7 @@
   "Clojure specs used by graph orientated functions, as well as graph orientated functions that are not metrics"
   (:require
     [com.fulcrologic.guardrails.core :refer [>defn => | ?]]
-    [clojure.spec.alpha :as s]
-    [au.com.seasoft.general.dev :as dev]))
+    [clojure.spec.alpha :as s]))
 
 ;;
 ;; A node on a graph
@@ -56,7 +55,7 @@
                      (clojure.set/subset? (nodes-in-edges x) nodes))]
         res)))
 
-(defn graph?
+(defn graph-map-only?
   "Is it a reasonable graph, suitable for display? (by Reveal usually)"
   [x]
   (let [nodes (-> x keys set)
@@ -66,3 +65,5 @@
                  (clojure.set/subset? (nodes-in-edges x) nodes))]
     ;(dev/log-off "graph?" res nodes (nodes-in-edges x) "subset?" (clojure.set/subset? (nodes-in-edges x) nodes))
     res))
+
+(def graph? graph-map-only?)

@@ -3,8 +3,7 @@
     [au.com.seasoft.graph.layout.graph-key-swap :as graph-key-swap]
     [au.com.seasoft.graph.graph :as gr]
     [com.fulcrologic.guardrails.core :refer [>defn => | ?]]
-    [clojure.core.async :as async :refer [>! chan go go-loop alts!! timeout]]
-    [au.com.seasoft.general.dev :as dev])
+    [clojure.core.async :as async :refer [>! chan go go-loop alts!! timeout]])
   (:import
     [au.com.seasoft.ham GenericGraph InteropNode InteropEdge InteropHAM]
     [com.syncleus.dann.math Vector]

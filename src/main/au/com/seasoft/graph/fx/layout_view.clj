@@ -4,8 +4,7 @@
     [au.com.seasoft.graph.graph :as gr]
     [au.com.seasoft.graph.util :as util]
     [au.com.seasoft.graph.layout.math :as math]
-    [vlaaad.reveal.ext :as rx]
-    [au.com.seasoft.general.dev :as dev])
+    [vlaaad.reveal.ext :as rx])
   (:import [javafx.scene.paint Color]))
 
 (def colour-options
