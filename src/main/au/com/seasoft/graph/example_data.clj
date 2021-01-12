@@ -4,6 +4,7 @@
 ;; TODO
 ;; Put some of these under example and some under test, even replicating if necessary. Have tests for all so
 ;; that all have a purpose (or get rid of them).
+;; Hmm - Actually nice to have example graphs for testing Reveal when only have this library
 
 (def simple-graph-1
   "Canonical form now using. Easier to update and order of the target nodes is not important so using a map
