@@ -4,7 +4,6 @@
     [au.com.seasoft.graph.graph :as gr]
     [com.fulcrologic.guardrails.core :refer [>defn => | ?]]
     [clojure.core.async :as async :refer [>! chan go go-loop alts!! timeout]]
-    [au.com.seasoft.general.dev :as dev]
     [au.com.seasoft.graph.util :as util])
   (:import
     [au.com.seasoft.ham GenericGraph InteropNode InteropEdge InteropHAM]
@@ -51,8 +50,8 @@
         (assert (map? m) ["Not a map" m])
         (let [^InteropNode interop-node (.getKey map-entry)
               int-id (.getId interop-node)
-              node-id (dev/safe-get int->k int-id)
-              node-props (dev/safe-get orig-graph-as-m node-id)
+              node-id (get int->k int-id)
+              node-props (get orig-graph-as-m node-id)
               targets-map (cond
                             (map? node-props) node-props
                             (seq node-props) (into {} node-props)

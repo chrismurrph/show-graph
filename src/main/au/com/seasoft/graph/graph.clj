@@ -1,7 +1,6 @@
 (ns au.com.seasoft.graph.graph
   "Clojure specs used by graph orientated functions, as well as graph orientated functions that are not metrics"
   (:require
-    [au.com.seasoft.general.dev :as dev]
     [com.fulcrologic.guardrails.core :refer [>defn => | ?]]
     [clojure.spec.alpha :as s]
     [au.com.seasoft.graph.util :as util]))
@@ -34,20 +33,16 @@
   [::graph => (s/coll-of ::pair :kind set)]
   (reduce
     (fn [acc [source-node v]]
-      (if (seq v)
-        (->> (dev/safe-keys (util/ensure-is-map v) 1)
-             (map (fn [target-node]
-                    [source-node target-node]))
-             (into acc))
-        acc))
+      (->> (keys (util/ensure-is-map v))
+           (map (fn [target-node]
+                  [source-node target-node]))
+           (into acc)))
     #{}
     g))
 
 (defn nodes-in-edges [g]
   (set (mapcat (fn [m]
-                 (if (seq m)
-                   (dev/safe-keys m 2)
-                   []))
+                 (keys m))
                (vals g))))
 
 ;; TODO

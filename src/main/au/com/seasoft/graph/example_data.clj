@@ -111,6 +111,13 @@
    [:4 []]
    ])
 
+(def simple-graph-4
+  [[:1 [[:2 {:weight 1}] [:3 {:weight 2}]]]
+   [:2 [[:4 {:weight 4}]]]
+   [:3 [[:4 {:weight 2}]]]
+   [:4 []]
+   ])
+
 (def ints-nodes-graph-3
   [[12123 {}]
    [11 {12123 10}]
