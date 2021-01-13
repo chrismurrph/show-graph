@@ -2,24 +2,25 @@
   "The HAM only works with int? keys yet we accept any keys"
   (:require
     [com.fulcrologic.guardrails.core :refer [>defn => | ?]]
-    ))
+    [clojure.spec.alpha :as s]
+    [au.com.seasoft.general.dev :as dev]))
 
 (>defn convert-targets
   [m k->int]
-  [map? map? => map?]
+  [(s/or :map map? :vector vector?) map? => map?]
   (->> m
        (map (fn [[k v]]
-              [(get k->int k) v]))
+              [(dev/safe-get k->int k) v]))
        (into {})))
 
 (defn ->strict-graph [g k->int]
   (->> g
        (map (fn [[k v]]
-              [(get k->int k) (convert-targets v k->int)]))
+              [(dev/safe-get k->int k) (convert-targets v k->int)]))
        (into {})))
 
 (defn ->graph [g]
-  (let [k->int (->> (keys g)
+  (let [k->int (->> (dev/safe-keys g 3)
                     (map-indexed
                       (fn [idx k] [k idx]))
                     (into {}))

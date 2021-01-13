@@ -1,8 +1,10 @@
 (ns au.com.seasoft.graph.graph
   "Clojure specs used by graph orientated functions, as well as graph orientated functions that are not metrics"
   (:require
+    [au.com.seasoft.general.dev :as dev]
     [com.fulcrologic.guardrails.core :refer [>defn => | ?]]
-    [clojure.spec.alpha :as s]))
+    [clojure.spec.alpha :as s]
+    [au.com.seasoft.graph.util :as util]))
 
 ;;
 ;; A node on a graph
@@ -32,20 +34,26 @@
   [::graph => (s/coll-of ::pair :kind set)]
   (reduce
     (fn [acc [source-node v]]
-      (into acc (map (fn [target-node]
-                       [source-node target-node])
-                     (keys v))))
+      (if (seq v)
+        (->> (dev/safe-keys (util/ensure-is-map v) 1)
+             (map (fn [target-node]
+                    [source-node target-node]))
+             (into acc))
+        acc))
     #{}
     g))
 
 (defn nodes-in-edges [g]
   (set (mapcat (fn [m]
-                 (keys m))
+                 (if (seq m)
+                   (dev/safe-keys m 2)
+                   []))
                (vals g))))
 
-(defn graph-lenient?
-  "Is it a reasonable graph, suitable for display? (by Reveal usually). Go back to this when issue #2 is fixed.
-  Also will be time to have the subset code below tested for both"
+;; TODO
+;; Have the subset code below tested for both sides of or
+(defn graph?
+  "Is it a reasonable graph, suitable for display? (by Reveal usually)"
   [x]
   (or (s/valid? (s/coll-of ::pair) x)
       (let [nodes (-> x keys set)
@@ -54,16 +62,3 @@
                      (s/valid? ::graph x)
                      (clojure.set/subset? (nodes-in-edges x) nodes))]
         res)))
-
-(defn graph-map-only?
-  "Is it a reasonable graph, suitable for display? (by Reveal usually)"
-  [x]
-  (let [nodes (-> x keys set)
-        res (and (map? x)
-                 (-> x vals first map?)
-                 (s/valid? ::graph x)
-                 (clojure.set/subset? (nodes-in-edges x) nodes))]
-    ;(dev/log-off "graph?" res nodes (nodes-in-edges x) "subset?" (clojure.set/subset? (nodes-in-edges x) nodes))
-    res))
-
-(def graph? graph-map-only?)

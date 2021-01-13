@@ -3,7 +3,9 @@
     [au.com.seasoft.graph.layout.graph-key-swap :as graph-key-swap]
     [au.com.seasoft.graph.graph :as gr]
     [com.fulcrologic.guardrails.core :refer [>defn => | ?]]
-    [clojure.core.async :as async :refer [>! chan go go-loop alts!! timeout]])
+    [clojure.core.async :as async :refer [>! chan go go-loop alts!! timeout]]
+    [au.com.seasoft.general.dev :as dev]
+    [au.com.seasoft.graph.util :as util])
   (:import
     [au.com.seasoft.ham GenericGraph InteropNode InteropEdge InteropHAM]
     [com.syncleus.dann.math Vector]
@@ -42,18 +44,23 @@
       (.addEdge result edge))
     result))
 
-(defn interop-coords->coords-hof [orig-graph int->k]
+(defn interop-coords->coords-hof [orig-graph-as-m int->k]
   (fn [^Map interop-coords]
     (reduce
       (fn [m map-entry]
+        (assert (map? m) ["Not a map" m])
         (let [^InteropNode interop-node (.getKey map-entry)
               int-id (.getId interop-node)
-              node-id (get int->k int-id)
-              node-props (get orig-graph node-id)
+              node-id (dev/safe-get int->k int-id)
+              node-props (dev/safe-get orig-graph-as-m node-id)
               targets-map (cond
                             (map? node-props) node-props
                             (seq node-props) (into {} node-props)
-                            :else (throw (ex-info "Got unexpected result from original graph" {:node-id node-id :result node-props})))
+                            (= [] node-props) {}
+                            :else (throw (ex-info "Got impossible! result from original graph"
+                                                  {:node-id         node-id
+                                                   :result          node-props
+                                                   :orig-graph-as-m orig-graph-as-m})))
               ^Vector v (.getValue map-entry)
               _ (assert (= 2 (.getDimensions v)))
               x (.getCoordinate v 1)
@@ -118,14 +125,15 @@
     7 "seventh"
     (str "ordinal " n)))
 
-(>defn graph->coords [g]
+(>defn graph->coords [g1]
   [::gr/graph => any?]
   (let [{:keys [::number-of-tries ::max-user-wait-time]} options
         _ (assert (int? number-of-tries) ["number-of-tries not int?" number-of-tries])
         _ (assert (int? max-user-wait-time) ["max-user-wait-time not int?" max-user-wait-time])
         timeout-chan (timeout max-user-wait-time)
         cs (repeatedly number-of-tries chan)
-        [strict-graph int->k] (graph-key-swap/->graph g)
+        g2 (util/ensure-is-map g1)
+        [strict-graph int->k] (graph-key-swap/->graph g2)
         interop-graph (graph->interop-graph strict-graph)]
     (go-loop [cs cs
               ordinal 1]
@@ -133,13 +141,12 @@
         (if-let [[counted coords :as res] (interop-graph->coords interop-graph)]
           (do
             (debug "Aligned" (ordinal-text ordinal) "after" counted "advances")
-            (>! (first cs) (conj res ordinal))
-            )
+            (>! (first cs) (conj res ordinal)))
           (do
             ;; Here we couldn't reach alignment after exhausting all the attempts/advances allowed,
             ;; so we start afresh on the next ordinal
             (recur (next cs) (inc ordinal))))))
-    (let [interop-coords->coords (interop-coords->coords-hof g int->k)
+    (let [interop-coords->coords (interop-coords->coords-hof g2 int->k)
           [[counted interop-coords ordinal] c] (alts!! (conj cs timeout-chan))]
       (if (not= c timeout-chan)
         (do

@@ -4,7 +4,8 @@
     [au.com.seasoft.graph.graph :as gr]
     [au.com.seasoft.graph.util :as util]
     [au.com.seasoft.graph.layout.math :as math]
-    [vlaaad.reveal.ext :as rx])
+    [vlaaad.reveal.ext :as rx]
+    [au.com.seasoft.general.dev :as dev])
   (:import [javafx.scene.paint Color]))
 
 (def colour-options
@@ -154,7 +155,7 @@
   (let [radius (::ham/radius ham/options)]
     (->> (gr/pair-edges graph)
          (map (fn [[source target]]
-                [(get coords source) (get coords target)]))
+                [(dev/safe-get coords source) (dev/safe-get coords target)]))
          (map (fn [[from to]]
                 (edge-view (shift-point radius from) (shift-point radius to)))))))
 
@@ -165,7 +166,7 @@
   (let [radius (::ham/radius ham/options)]
     (->> (gr/pair-edges graph)
          (map (fn [[source target]]
-                [(get coords source) (get coords target)]))
+                [(dev/safe-get coords source) (dev/safe-get coords target)]))
          (map (fn [[from to]]
                 (triangle-view (shift-point radius from) (shift-point radius to)))))))
 
@@ -232,8 +233,7 @@
                :style   {:-fx-font-weight :bold}}]})
 
 (defn coords->component [g coords reveal?]
-  (let [g (cond->> g
-                   ((complement map?) g) (into {}))
+  (let [g (util/ensure-is-map g)
         view-vertices (->vertex-views coords reveal?)
         view-edges (->edge-views g coords)
         view-arrows (->arrow-views g coords)
@@ -243,8 +243,7 @@
      :content      (pane-of-vertices-and-edges widgets)}))
 
 (defn graph->component [g reveal?]
-  (let [g (cond->> g
-                   ((complement map?) g) (into {}))
+  (let [g (util/ensure-is-map g)
         coords (ham/graph->coords g)]
     (if coords
       (coords->component g coords reveal?)

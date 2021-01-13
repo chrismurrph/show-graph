@@ -17,3 +17,8 @@
                (take max-visible-len)
                (apply str))))
 
+(defn ensure-is-map [x]
+  (cond->> x
+           ((complement map?) x) (into {})))
+
+

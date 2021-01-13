@@ -36,8 +36,16 @@ Here `{:weight 1}` is the properties map for the directed edge :1 -> :2, but we 
 These 'properties' are just going along for the ride - they don't need to be read when laying out a graph. All that 
 Show Graph needs to discover is the edges that run between the vertices. 
 
-Another variation that's 'in the works' is for the data structure not to be a map but a coll of tuples. We've
-hit a snag (see issues #2) on this that will hopefully be resolved soon.
+Another variation is for the data structure not to be a map but a coll of tuples. So given these last two points this 
+is also a valid graph:
+
+```
+[[:1 [[:2 1] [:3 2]]]
+ [:2 [[:4 4]]]
+ [:3 [[:4 2]]]
+ [:4 []]
+]
+```
 
 ### Is it useful?
 
